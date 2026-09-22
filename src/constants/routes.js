@@ -42,10 +42,6 @@ export const ROUTES = {
     label: 'Subscription',
     value: '/subscription',
   },
-  ATTENDANCE: {
-    label: 'Attendance',
-    value: '/attendance',
-  },
   ADMIN: {
     label: 'Admin Overview',
     value: '/admin',

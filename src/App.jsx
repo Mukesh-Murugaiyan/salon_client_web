@@ -17,7 +17,6 @@ import ServicesList from './pages/Services/ServicesList';
 import Plans from './pages/Plans';
 import Salons from './pages/Salons';
 import Subscriptions from './pages/Subscriptions';
-import Attendance from './pages/Attendance';
 import { ROUTES } from './constants/routes';
 
 /**
@@ -94,16 +93,6 @@ const App = () => {
           element={
             <PermissionRoute requiredPermission="appointments:view">
               <Appointments />
-            </PermissionRoute>
-          }
-        />
-
-        {/* Attendance */}
-        <Route
-          path={ROUTES.ATTENDANCE.value}
-          element={
-            <PermissionRoute anyOf={['attendance:check_in', 'attendance:view']}>
-              <Attendance />
             </PermissionRoute>
           }
         />
