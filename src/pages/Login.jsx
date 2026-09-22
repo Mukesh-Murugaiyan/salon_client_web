@@ -1,0 +1,275 @@
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Divider,
+} from '@mui/material';
+import {
+  Visibility,
+  VisibilityOff,
+  Email as EmailIcon,
+  Lock as LockIcon,
+  Spa as SpaIcon,
+} from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
+import { getDefaultDashboardRoute } from '../routes/navigation';
+
+const DEMO_ACCOUNTS = [
+  { role: 'SUPER_ADMIN', email: 'admin@saloncrm.com', pass: 'Admin@123', label: 'Super Admin' },
+  { role: 'OWNER', email: 'owner@saloncrm.com', pass: 'Owner@123', label: 'Owner' },
+  { role: 'RECEPTIONIST', email: 'receptionist@saloncrm.com', pass: 'Receptionist@123', label: 'Receptionist' },
+];
+
+const Login = () => {
+  const { login, isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // If already authenticated, redirect to role-specific dashboard
+  if (isAuthenticated && user) {
+    const from = location.state?.from?.pathname || getDefaultDashboardRoute(user.role);
+    return <Navigate to={from} replace />;
+  }
+
+  const validate = () => {
+    const errors = {};
+    if (!email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!password) {
+      errors.password = 'Password is required';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return; // Prevent duplicate requests
+    setErrorMessage('');
+
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const loggedInUser = await login(email.trim(), password);
+      // Centralized post-login redirection based on role
+      const targetRoute = getDefaultDashboardRoute(loggedInUser.role);
+      navigate(targetRoute, { replace: true });
+    } catch (err) {
+      const apiMessage =
+        err.response?.data?.message ||
+        (err.response?.status === 401
+          ? 'Invalid email or password.'
+          : err.response?.status === 403
+          ? 'Your account is disabled. Please contact the administrator.'
+          : 'Unable to connect to the authentication service. Please check backend server.');
+      setErrorMessage(apiMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFillDemo = (demoEmail, demoPass) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setErrorMessage('');
+    setFieldErrors({});
+  };
+
+  const isFormValid = email.trim().length > 0 && password.length > 0;
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc',
+        px: 2,
+        py: 4,
+      }}
+    >
+      <Card
+        elevation={0}
+        sx={{
+          maxWidth: 440,
+          width: '100%',
+          p: 2,
+          borderRadius: 3,
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          {/* Header & Logo */}
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
+                color: '#ffffff',
+                mb: 1.5,
+              }}
+            >
+              <SpaIcon fontSize="medium" />
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#0f172a' }}>
+              Salon ERP Portal
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Sign in to manage appointments, clients & salons
+            </Typography>
+          </Box>
+
+          {/* Global Alert */}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
+
+          {/* Login Form */}
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <TextField
+              id="login-email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!fieldErrors.email}
+              helperText={fieldErrors.email}
+              disabled={isSubmitting}
+              autoComplete="email"
+              autoFocus
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ color: '#94a3b8' }} fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              id="login-password"
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              fullWidth
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!fieldErrors.password}
+              helperText={fieldErrors.password}
+              disabled={isSubmitting}
+              autoComplete="current-password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: '#94a3b8' }} fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      size="small"
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Button
+              id="login-submit-btn"
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={!isFormValid || isSubmitting}
+              sx={{
+                mt: 2.5,
+                mb: 2,
+                py: 1.3,
+                fontSize: '0.95rem',
+                backgroundColor: '#6366f1',
+                '&:hover': {
+                  backgroundColor: '#4f46e5',
+                },
+              }}
+            >
+              {isSubmitting ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <span>Signing in...</span>
+                </Box>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </Box>
+
+          <Divider sx={{ my: 2.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              QUICK DEMO ACCOUNTS
+            </Typography>
+          </Divider>
+
+          {/* Helper demo account chips */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+            {DEMO_ACCOUNTS.map((acc) => (
+              <Chip
+                key={acc.role}
+                label={acc.label}
+                variant="outlined"
+                size="small"
+                onClick={() => handleFillDemo(acc.email, acc.pass)}
+                disabled={isSubmitting}
+                sx={{
+                  cursor: 'pointer',
+                  borderColor: '#cbd5e1',
+                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#94a3b8' },
+                }}
+              />
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
+
+export default Login;
