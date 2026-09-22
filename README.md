@@ -99,6 +99,21 @@ UI Navigation & Page Access
    - Status transition menu (Confirmed, Pending, Completed, Cancelled).
    - Detailed Appointment overview modal with client, service, staff, and schedule information.
    - Permission-governed controls (`appointments:view`, `appointments:create`, `appointments:update`, `appointments:delete`).
+9. **Plan Management (`/plans`, `/admin/plans`) — Ticket 8**:
+   - SaaS subscription tier directory with pricing, duration in days, max staff limits, and max appointment limits.
+   - Add/Edit Plan dialog with field validation and duplicate name prevention.
+   - View Plan details modal.
+   - Activate / Deactivate plan toggle.
+   - Permission-governed controls (`plans:view`, `plans:create`, `plans:update`, `plans:delete`).
+10. **Subscription Management (`/subscription`) — Ticket 8**:
+   - Real-time subscription overview: Active plan tier, price, cycle dates, and remaining days.
+   - Live Quota Usage progress bars:
+     - Staff member utilization (`staffCount / maxStaff`).
+     - Appointment bookings utilization (`appointmentsCount / maxAppointments`).
+   - Assign Plan, Renew Subscription, and Upgrade Plan modals.
+   - Subscription Audit History table displaying plan tier, price, coverage dates, action (`ASSIGN`, `RENEW`, `UPGRADE`), and timestamp.
+   - Strict expiration gating: When a subscription expires, gated operational actions (registering staff, booking appointments) are blocked with exact server error feedback.
+   - Permission-governed controls (`subscription:view`, `subscription:assign`, `subscription:renew`, `subscription:upgrade`, `subscription:history`).
 
 ---
 

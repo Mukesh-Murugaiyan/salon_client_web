@@ -50,6 +50,10 @@ export const ROUTES = {
     label: 'Plans',
     value: '/admin/plans',
   },
+  PLANS: {
+    label: 'Plans',
+    value: '/plans',
+  },
   ADMIN_SALONS: {
     label: 'Salons',
     value: '/admin/salons',

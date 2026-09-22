@@ -146,6 +146,14 @@ const App = () => {
             </PermissionRoute>
           }
         />
+        <Route
+          path={ROUTES.PLANS.value}
+          element={
+            <PermissionRoute requiredPermission="plans:view">
+              <Plans />
+            </PermissionRoute>
+          }
+        />
 
         {/* Companies / Salons Management */}
         <Route
