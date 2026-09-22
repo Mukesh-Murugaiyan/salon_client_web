@@ -12,7 +12,8 @@ import { Card, CardContent, Typography, Box, Avatar } from '@mui/material';
  * @param {string} [props.color='#6366f1'] - Theme accent color
  * @param {string} [props.subtitle] - Optional helper text or percentage
  */
-const SummaryCard = ({ label, value, icon, color = '#6366f1', subtitle }) => {
+const SummaryCard = ({ label, title, value, icon, color = '#6366f1', subtitle }) => {
+  const displayLabel = label || title;
   return (
     <Card
       elevation={0}
@@ -32,7 +33,7 @@ const SummaryCard = ({ label, value, icon, color = '#6366f1', subtitle }) => {
       <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="body2" sx={{ fontWeight: 600, color: '#64748b' }}>
-            {label}
+            {displayLabel}
           </Typography>
           {icon && (
             <Avatar

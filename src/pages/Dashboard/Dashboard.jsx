@@ -46,8 +46,8 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getDashboardSummary();
-      setSummary(data);
+      const res = await getDashboardSummary();
+      setSummary(res?.data || res);
     } catch (err) {
       console.error('[Dashboard] Metrics load failed:', err);
       setError(err.response?.data?.message || 'Failed to load dashboard metrics.');
@@ -112,36 +112,36 @@ const Dashboard = () => {
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
-                title="Today's Appointments"
+                label="Today's Appointments"
                 value={summary?.todayAppointments ?? 0}
-                icon="CalendarMonth"
+                icon={<CalendarIcon />}
                 color="#6366f1"
                 subtitle="Booked for today"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
-                title="Confirmed Bookings"
+                label="Confirmed Bookings"
                 value={summary?.confirmedAppointments ?? 0}
-                icon="CheckCircle"
+                icon={<CheckIcon />}
                 color="#10b981"
                 subtitle="Ready for service"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
-                title="Active Clients"
+                label="Active Clients"
                 value={summary?.activeClients ?? 0}
-                icon="People"
+                icon={<PeopleIcon />}
                 color="#f59e0b"
                 subtitle="Total registered"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
-                title="Salon Users"
-                value={summary?.staffCount ?? 1}
-                icon="Badge"
+                label="Salon Users"
+                value={summary?.staffCount ?? 0}
+                icon={<BadgeIcon />}
                 color="#ec4899"
                 subtitle="Active accounts"
               />
