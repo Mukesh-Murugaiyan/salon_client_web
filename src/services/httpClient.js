@@ -1,7 +1,6 @@
 import axios from 'axios';
 import storage from '../utils/storage';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { ApiConfig } from '../config/ApiConfig';
 
 /**
  * Reusable Axios HTTP client.
@@ -9,11 +8,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
  * and response error handling.
  */
 const httpClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: ApiConfig.getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: ApiConfig.TIMEOUT_MS,
 });
 
 // Interceptor to inject the JWT Bearer token into outgoing requests

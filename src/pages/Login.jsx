@@ -23,6 +23,9 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from '../constants/routes';
+import { Validation } from '../utils/Validation';
+import { StringUtils } from '../utils/StringUtils';
+import { AppConfig } from '../config/AppConfig';
 
 const Login = () => {
   const { login, isAuthenticated, user } = useAuth();
@@ -44,9 +47,10 @@ const Login = () => {
 
   const validate = () => {
     const errors = {};
-    if (!email.trim()) {
+    const trimmedEmail = StringUtils.trim(email);
+    if (!trimmedEmail) {
       errors.email = 'Email is required';
-    } else if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+    } else if (!Validation.isValidEmail(trimmedEmail)) {
       errors.email = 'Please enter a valid email address';
     }
 
