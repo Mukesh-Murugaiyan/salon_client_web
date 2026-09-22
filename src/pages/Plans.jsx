@@ -289,8 +289,8 @@ const Plans = () => {
             }
           />
         ) : (
-          <TableContainer>
-            <Table sx={{ minWidth: 750 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 700 }}>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Plan Tier</TableCell>
@@ -444,7 +444,7 @@ const Plans = () => {
                 placeholder="Target salon size, included features and support..."
               />
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
                   label="Price ($)"
                   type="number"
@@ -472,7 +472,7 @@ const Plans = () => {
                 />
               </Box>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
                   label="Max Staff Limit"
                   type="number"
@@ -508,7 +508,7 @@ const Plans = () => {
               />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+          <DialogActions sx={{ px: 2, py: 1.25 }}>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
@@ -605,7 +605,7 @@ const Plans = () => {
                 </Box>
               </Box>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 1.5 }}>
+            <DialogActions sx={{ px: 2, py: 1.25 }}>
               <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
                 Close
               </Button>
@@ -624,7 +624,7 @@ const Plans = () => {
             Are you sure you want to deactivate <strong>{targetPlan?.name}</strong>? It will no longer be available for salons to select.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 2, py: 1.25 }}>
           <Button onClick={() => setDeactivateDialogOpen(false)} disabled={isDeactivating} sx={{ textTransform: 'none' }}>
             Cancel
           </Button>

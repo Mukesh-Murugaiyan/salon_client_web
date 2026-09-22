@@ -7,6 +7,7 @@ import Sidebar from '../components/layout/Sidebar';
 /**
  * Authenticated Application Shell Layout
  * Integrates responsive Sidebar, Header, and page content Outlet.
+ * Enforces strict viewport width limits to eliminate horizontal scroll.
  */
 const DashboardLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -16,7 +17,16 @@ const DashboardLayout = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'hidden',
+        backgroundColor: '#f8fafc',
+      }}
+    >
       {/* Top Navigation Header */}
       <Header onMobileMenuToggle={handleDrawerToggle} />
 
@@ -28,14 +38,17 @@ const DashboardLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2.5, sm: 3.5, md: 4 },
-          width: { md: `calc(100% - 260px)` },
+          p: { xs: 1.5, sm: 2, md: 3 },
+          width: { xs: '100%', md: 'calc(100% - 240px)' },
+          maxWidth: { xs: '100%', md: 'calc(100% - 240px)' },
           minHeight: '100vh',
+          boxSizing: 'border-box',
+          overflowX: 'hidden',
           backgroundColor: '#f8fafc',
         }}
       >
-        {/* Spacer for fixed AppBar */}
-        <Toolbar />
+        {/* Spacer matching fixed AppBar height */}
+        <Toolbar sx={{ minHeight: { xs: 52, sm: 58 } }} />
         <Outlet />
       </Box>
     </Box>

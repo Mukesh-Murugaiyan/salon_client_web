@@ -231,13 +231,13 @@ const UserList = () => {
       )}
 
       {/* Search Bar */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+      <Box sx={{ mb: { xs: 2, sm: 2.5 }, display: 'flex', gap: 1.5 }}>
         <TextField
           placeholder="Search by name, email, salon, or role..."
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: { xs: '100%', sm: 360 }, backgroundColor: '#ffffff' }}
+          sx={{ width: { xs: '100%', sm: 340 }, backgroundColor: '#ffffff' }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -260,9 +260,9 @@ const UserList = () => {
           onAction={handleOpenCreate}
         />
       ) : (
-        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <TableContainer>
-            <Table>
+        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 700 }}>
               <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Name</TableCell>
@@ -449,7 +449,7 @@ const UserList = () => {
               label={formData.isActive ? 'Account Active' : 'Account Inactive'}
             />
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+          <DialogActions sx={{ px: 2, py: 1.25 }}>
             <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
               Cancel
             </Button>

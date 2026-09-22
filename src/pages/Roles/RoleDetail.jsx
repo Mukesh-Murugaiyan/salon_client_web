@@ -203,15 +203,15 @@ const RoleDetail = () => {
       )}
 
       {/* Role Summary Header Card */}
-      <Card sx={{ mb: 3, borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Card sx={{ mb: { xs: 2, sm: 2.5 }, borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '12px',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '10px',
                   backgroundColor: 'rgba(99, 102, 241, 0.1)',
                   color: '#6366f1',
                   display: 'flex',
@@ -219,11 +219,11 @@ const RoleDetail = () => {
                   justifyContent: 'center',
                 }}
               >
-                <SecurityIcon fontSize="medium" />
+                <SecurityIcon sx={{ fontSize: 22 }} />
               </Box>
               <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', fontSize: { xs: '1rem', sm: '1.15rem' } }}>
                     {role.name}
                   </Typography>
                   <Chip
@@ -232,7 +232,7 @@ const RoleDetail = () => {
                     sx={{
                       fontFamily: 'monospace',
                       fontWeight: 600,
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       backgroundColor: '#f1f5f9',
                       color: '#334155',
                     }}
@@ -242,29 +242,29 @@ const RoleDetail = () => {
                     label={role.isActive ? 'Active' : 'Inactive'}
                     color={role.isActive ? 'success' : 'default'}
                     variant="outlined"
-                    sx={{ fontWeight: 600 }}
+                    sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                   />
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: '0.8rem' }}>
                   {role.description || 'No description provided.'}
                 </Typography>
               </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Box sx={{ p: 1.5, px: 2, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+              <Box sx={{ p: 1, px: 1.5, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, fontSize: '0.65rem' }}>
                   ENABLED PERMISSIONS
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#6366f1' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#6366f1' }}>
                   {selectedPermissions.size}
                 </Typography>
               </Box>
-              <Box sx={{ p: 1.5, px: 2, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+              <Box sx={{ p: 1, px: 1.5, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, fontSize: '0.65rem' }}>
                   ASSIGNED USERS
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a' }}>
                   {assignedUsers.length}
                 </Typography>
               </Box>
@@ -274,8 +274,14 @@ const RoleDetail = () => {
       </Card>
 
       {/* Tabs: Permission Matrix / Assigned Users */}
-      <Box sx={{ borderBottom: 1, borderColor: '#e2e8f0', mb: 3 }}>
-        <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)}>
+      <Box sx={{ borderBottom: 1, borderColor: '#e2e8f0', mb: { xs: 2, sm: 2.5 } }}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, val) => setActiveTab(val)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, px: 1.5, fontSize: '0.8125rem' } }}
+        >
           <Tab label={`Permission Matrix (${selectedPermissions.size})`} sx={{ textTransform: 'none', fontWeight: 600 }} />
           <Tab label={`Assigned Users (${assignedUsers.length})`} sx={{ textTransform: 'none', fontWeight: 600 }} />
         </Tabs>
@@ -283,16 +289,18 @@ const RoleDetail = () => {
 
       {/* TAB 0: Interactive Permission Matrix */}
       {activeTab === 0 && (
-        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
           <Box
             sx={{
-              p: 2,
-              px: 3,
+              p: { xs: 1.25, sm: 1.5 },
+              px: { xs: 1.5, sm: 2 },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               backgroundColor: '#f8fafc',
               borderBottom: '1px solid #e2e8f0',
+              flexWrap: 'wrap',
+              gap: 1,
             }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>
@@ -320,8 +328,8 @@ const RoleDetail = () => {
             </Box>
           </Box>
 
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead sx={{ backgroundColor: '#ffffff' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700, color: '#475569', minWidth: 200 }}>Module / Resource</TableCell>
@@ -442,8 +450,8 @@ const RoleDetail = () => {
               </Typography>
             </Box>
           ) : (
-            <TableContainer>
-              <Table>
+            <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
+              <Table sx={{ minWidth: 500 }}>
                 <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Name</TableCell>

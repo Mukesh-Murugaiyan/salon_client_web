@@ -113,44 +113,43 @@ const Login = () => {
       <Card
         elevation={0}
         sx={{
-          maxWidth: 440,
+          maxWidth: 400,
           width: '100%',
-          p: 2,
           borderRadius: 3,
           border: '1px solid #e2e8f0',
           boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
         }}
       >
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
           {/* Header & Logo */}
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Box sx={{ textAlign: 'center', mb: 2.5 }}>
             <Box
               sx={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 48,
-                height: 48,
-                borderRadius: '12px',
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
                 background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
                 color: '#ffffff',
-                mb: 1.5,
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                mb: 1.25,
+                boxShadow: '0 4px 10px rgba(99, 102, 241, 0.25)',
               }}
             >
-              <SpaIcon fontSize="medium" />
+              <SpaIcon fontSize="small" />
             </Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#0f172a' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.15rem' }}>
               Salon ERP Portal
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8125rem' }}>
               Dynamic Multi-Tenant SaaS Platform
             </Typography>
           </Box>
 
           {/* Global Alert */}
           {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
+            <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
               {errorMessage}
             </Alert>
           )}
@@ -162,7 +161,7 @@ const Login = () => {
               label="Email Address"
               type="email"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={!!fieldErrors.email}
@@ -184,7 +183,7 @@ const Login = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               fullWidth
-              margin="normal"
+              margin="dense"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={!!fieldErrors.password}
@@ -219,10 +218,10 @@ const Login = () => {
               variant="contained"
               disabled={!isFormValid || isSubmitting}
               sx={{
-                mt: 2.5,
-                mb: 2,
-                py: 1.3,
-                fontSize: '0.95rem',
+                mt: 2,
+                mb: 1.5,
+                py: 0.9,
+                fontSize: '0.875rem',
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
                 '&:hover': {
@@ -232,7 +231,7 @@ const Login = () => {
             >
               {isSubmitting ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CircularProgress size={20} color="inherit" />
+                  <CircularProgress size={18} color="inherit" />
                   <span>Signing in...</span>
                 </Box>
               ) : (
@@ -241,8 +240,8 @@ const Login = () => {
             </Button>
           </Box>
 
-          <Divider sx={{ my: 2.5 }}>
-            <Typography variant="caption" color="text.secondary">
+          <Divider sx={{ my: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
               QUICK SEED ACCESS
             </Typography>
           </Divider>
@@ -259,6 +258,7 @@ const Login = () => {
                 cursor: 'pointer',
                 borderColor: '#cbd5e1',
                 fontWeight: 600,
+                fontSize: '0.75rem',
                 '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
               }}
             />

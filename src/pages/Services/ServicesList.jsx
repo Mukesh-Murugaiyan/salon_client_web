@@ -294,58 +294,58 @@ const ServicesList = () => {
       )}
 
       {/* Stats Summary Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: 3 }}>
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'primary.light', color: 'primary.main', display: 'flex' }}>
-            <SpaIcon fontSize="small" />
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 1, sm: 1.5 }, mb: 2 }}>
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: 'primary.light', color: 'primary.main', display: 'flex' }}>
+            <SpaIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Total Services
             </Typography>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.total}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'success.light', color: 'success.main', display: 'flex' }}>
-            <CheckCircleIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: 'success.light', color: 'success.main', display: 'flex' }}>
+            <CheckCircleIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Active
             </Typography>
-            <Typography variant="h6" fontWeight={700} color="success.main">
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: 'success.main', fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.active}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'action.hover', color: 'text.secondary', display: 'flex' }}>
-            <BlockIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: 'action.hover', color: 'text.secondary', display: 'flex' }}>
+            <BlockIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Inactive
             </Typography>
-            <Typography variant="h6" fontWeight={700} color="text.secondary">
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: 'text.secondary', fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.inactive}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'warning.light', color: 'warning.dark', display: 'flex' }}>
-            <AttachMoneyIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: 'warning.light', color: 'warning.dark', display: 'flex' }}>
+            <AttachMoneyIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Avg. Price
             </Typography>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               ${stats.avgPrice}
             </Typography>
           </Box>
@@ -353,16 +353,16 @@ const ServicesList = () => {
       </Box>
 
       {/* Main Table Container */}
-      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         {/* Search and Tabs Bar */}
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1.25, sm: 1.5 },
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'stretch', sm: 'center' },
-            gap: 2,
+            gap: 1.5,
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -372,11 +372,13 @@ const ServicesList = () => {
             onChange={(e, val) => setStatusFilter(val)}
             textColor="primary"
             indicatorColor="primary"
-            sx={{ minHeight: 40 }}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{ minHeight: 34, '& .MuiTab-root': { minHeight: 34, py: 0.25, px: 1.5, fontSize: '0.75rem', fontWeight: 600, textTransform: 'none' } }}
           >
-            <Tab label={`All (${stats.total})`} value="all" sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label={`Active (${stats.active})`} value="active" sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label={`Inactive (${stats.inactive})`} value="inactive" sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
+            <Tab label={`All (${stats.total})`} value="all" />
+            <Tab label={`Active (${stats.active})`} value="active" />
+            <Tab label={`Inactive (${stats.inactive})`} value="inactive" />
           </Tabs>
 
           <TextField
@@ -391,7 +393,7 @@ const ServicesList = () => {
                 </InputAdornment>
               ),
             }}
-            sx={{ width: { xs: '100%', sm: 300 } }}
+            sx={{ width: { xs: '100%', sm: 260 } }}
           />
         </Box>
 
@@ -419,7 +421,7 @@ const ServicesList = () => {
             }
           />
         ) : (
-          <TableContainer>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
             <Table sx={{ minWidth: 650 }}>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
                 <TableRow>
@@ -579,7 +581,7 @@ const ServicesList = () => {
                 placeholder="Brief description of treatments and styling included..."
               />
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
                   label="Duration (minutes)"
                   type="number"
@@ -619,7 +621,7 @@ const ServicesList = () => {
               />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+          <DialogActions sx={{ px: 2, py: 1.25 }}>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
@@ -712,7 +714,7 @@ const ServicesList = () => {
                 </Box>
               </Box>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 1.5 }}>
+            <DialogActions sx={{ px: 2, py: 1.25 }}>
               <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
                 Close
               </Button>
@@ -732,7 +734,7 @@ const ServicesList = () => {
             <strong>{deletingService?.name}</strong>? It will no longer be available for new bookings, but historical records will be preserved.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 2, py: 1.25 }}>
           <Button onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting} sx={{ textTransform: 'none' }}>
             Cancel
           </Button>

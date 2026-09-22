@@ -19,7 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getRoleLabel } from '../../utils/role.utils';
 import { ROUTES } from '../../constants/routes';
 
-const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 240;
 
 const getRoleChipColor = (role) => {
   switch (role) {
@@ -67,20 +67,34 @@ const Header = ({ onMobileMenuToggle }) => {
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, sm: 3 } }}>
+      <Toolbar
+        sx={{
+          justifyContent: 'space-between',
+          minHeight: { xs: 52, sm: 58 },
+          px: { xs: 1.5, sm: 2.5 },
+        }}
+      >
         {/* Left: Mobile Toggle & Page Brand Context */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton
             color="inherit"
             aria-label="open navigation drawer"
             edge="start"
             onClick={onMobileMenuToggle}
-            sx={{ display: { md: 'none' }, mr: 1, color: '#334155' }}
+            sx={{ display: { md: 'none' }, mr: 0.5, color: '#334155', p: 0.75 }}
           >
-            <MenuIcon />
+            <MenuIcon fontSize="small" />
           </IconButton>
 
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#0f172a', display: { xs: 'none', sm: 'block' } }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              color: '#0f172a',
+              display: { xs: 'none', sm: 'block' },
+            }}
+          >
             Salon Management Console
           </Typography>
 
@@ -89,18 +103,18 @@ const Header = ({ onMobileMenuToggle }) => {
               label={formattedRole}
               size="small"
               color={getRoleChipColor(user.role)}
-              sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+              sx={{ fontWeight: 600, fontSize: '0.7rem', height: 22 }}
             />
           )}
         </Box>
 
         {/* Right: User Identity & Logout Button */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+          <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.1, fontSize: '0.8125rem' }}>
               {user?.name || 'User'}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
               {user?.email}
             </Typography>
           </Box>
@@ -108,9 +122,9 @@ const Header = ({ onMobileMenuToggle }) => {
           <Avatar
             sx={{
               bgcolor: '#6366f1',
-              width: 36,
-              height: 36,
-              fontSize: '0.875rem',
+              width: 32,
+              height: 32,
+              fontSize: '0.8rem',
               fontWeight: 600,
             }}
           >
@@ -118,21 +132,44 @@ const Header = ({ onMobileMenuToggle }) => {
           </Avatar>
 
           <Tooltip title="Log out of system">
-            <Button
-              variant="outlined"
-              color="inherit"
-              size="small"
-              startIcon={<LogoutIcon />}
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              sx={{
-                borderColor: '#e2e8f0',
-                color: '#64748b',
-                '&:hover': { borderColor: '#cbd5e1', backgroundColor: '#f1f5f9' },
-              }}
-            >
-              Logout
-            </Button>
+            <Box>
+              {/* Desktop Logout Button */}
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="small"
+                startIcon={<LogoutIcon fontSize="small" />}
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                sx={{
+                  display: { xs: 'none', sm: 'inline-flex' },
+                  borderColor: '#e2e8f0',
+                  color: '#64748b',
+                  fontSize: '0.8125rem',
+                  py: 0.5,
+                  px: 1.25,
+                  '&:hover': { borderColor: '#cbd5e1', backgroundColor: '#f1f5f9' },
+                }}
+              >
+                Logout
+              </Button>
+
+              {/* Mobile Icon Button */}
+              <IconButton
+                size="small"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                sx={{
+                  display: { xs: 'inline-flex', sm: 'none' },
+                  border: '1px solid #e2e8f0',
+                  color: '#64748b',
+                  p: 0.75,
+                }}
+                aria-label="Logout"
+              >
+                <LogoutIcon fontSize="small" />
+              </IconButton>
+            </Box>
           </Tooltip>
         </Box>
       </Toolbar>

@@ -391,58 +391,58 @@ const Appointments = () => {
       )}
 
       {/* Metric Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 2, mb: 3 }}>
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: 'primary.light', color: 'primary.main', display: 'flex' }}>
-            <CalendarMonthIcon fontSize="small" />
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 1, sm: 1.5 }, mb: 2 }}>
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: 'primary.light', color: 'primary.main', display: 'flex' }}>
+            <CalendarMonthIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Total Bookings
             </Typography>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.total}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: '#eff6ff', color: '#1d4ed8', display: 'flex' }}>
-            <CheckCircleIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: '#eff6ff', color: '#1d4ed8', display: 'flex' }}>
+            <CheckCircleIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Confirmed
             </Typography>
-            <Typography variant="h6" fontWeight={700} sx={{ color: '#1d4ed8' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1d4ed8', fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.confirmed}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: '#f0fdf4', color: '#15803d', display: 'flex' }}>
-            <CheckCircleIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: '#f0fdf4', color: '#15803d', display: 'flex' }}>
+            <CheckCircleIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Completed
             </Typography>
-            <Typography variant="h6" fontWeight={700} sx={{ color: '#15803d' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#15803d', fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.completed}
             </Typography>
           </Box>
         </Card>
 
-        <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, borderRadius: 2 }}>
-          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: '#fef2f2', color: '#b91c1c', display: 'flex' }}>
-            <CancelIcon fontSize="small" />
+        <Card sx={{ p: { xs: 1.25, sm: 1.5 }, display: 'flex', alignItems: 'center', gap: 1.25, borderRadius: 2 }}>
+          <Box sx={{ p: 0.75, borderRadius: 1.25, bgcolor: '#fef2f2', color: '#b91c1c', display: 'flex' }}>
+            <CancelIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
               Cancelled
             </Typography>
-            <Typography variant="h6" fontWeight={700} sx={{ color: '#b91c1c' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#b91c1c', fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
               {stats.cancelled}
             </Typography>
           </Box>
@@ -450,16 +450,16 @@ const Appointments = () => {
       </Box>
 
       {/* Main Table Card */}
-      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+      <Card sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         {/* Filter Toolbar */}
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1.25, sm: 1.5 },
             display: 'flex',
             flexDirection: { xs: 'column', lg: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'stretch', lg: 'center' },
-            gap: 2,
+            gap: 1.5,
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -472,17 +472,17 @@ const Appointments = () => {
             indicatorColor="primary"
             variant="scrollable"
             scrollButtons="auto"
-            sx={{ minHeight: 40 }}
+            sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, px: 1.5, fontSize: '0.8125rem' } }}
           >
-            <Tab label="All" value="all" sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label="Confirmed" value={APPOINTMENT_STATUS.CONFIRMED} sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label="Pending" value={APPOINTMENT_STATUS.PENDING} sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label="Completed" value={APPOINTMENT_STATUS.COMPLETED} sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
-            <Tab label="Cancelled" value={APPOINTMENT_STATUS.CANCELLED} sx={{ textTransform: 'none', fontWeight: 600, minHeight: 40, py: 0 }} />
+            <Tab label="All" value="all" sx={{ textTransform: 'none', fontWeight: 600 }} />
+            <Tab label="Confirmed" value={APPOINTMENT_STATUS.CONFIRMED} sx={{ textTransform: 'none', fontWeight: 600 }} />
+            <Tab label="Pending" value={APPOINTMENT_STATUS.PENDING} sx={{ textTransform: 'none', fontWeight: 600 }} />
+            <Tab label="Completed" value={APPOINTMENT_STATUS.COMPLETED} sx={{ textTransform: 'none', fontWeight: 600 }} />
+            <Tab label="Cancelled" value={APPOINTMENT_STATUS.CANCELLED} sx={{ textTransform: 'none', fontWeight: 600 }} />
           </Tabs>
 
           {/* Date, Staff, and Search Filter */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', width: { xs: '100%', lg: 'auto' } }}>
             <TextField
               size="small"
               type="date"
@@ -490,19 +490,19 @@ const Appointments = () => {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              sx={{ width: 160 }}
+              sx={{ width: { xs: 'calc(50% - 4px)', sm: 140 } }}
             />
 
             <Button
               size="small"
               variant="outlined"
               onClick={() => setSelectedDate(selectedDate ? '' : getTodayString())}
-              sx={{ textTransform: 'none', fontSize: '0.8rem', height: 40 }}
+              sx={{ textTransform: 'none', fontSize: '0.75rem', height: 36, minWidth: { xs: 'calc(50% - 4px)', sm: 'auto' } }}
             >
               {selectedDate ? 'All Dates' : 'Today'}
             </Button>
 
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 150 } }}>
               <InputLabel>Staff</InputLabel>
               <Select
                 value={selectedStaffId}
@@ -530,7 +530,7 @@ const Appointments = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ width: 220 }}
+              sx={{ width: { xs: '100%', sm: 190 } }}
             />
           </Box>
         </Box>
@@ -893,7 +893,7 @@ const Appointments = () => {
               />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+          <DialogActions sx={{ px: 2, py: 1.25 }}>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
@@ -1007,7 +1007,7 @@ const Appointments = () => {
                 </Box>
               </Box>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 1.5 }}>
+            <DialogActions sx={{ px: 2, py: 1.25 }}>
               <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
                 Close
               </Button>
@@ -1030,7 +1030,7 @@ const Appointments = () => {
             <strong>{cancellingAppointment?.startTime}</strong>?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 2, py: 1.25 }}>
           <Button onClick={() => setCancelDialogOpen(false)} disabled={isCancelling} sx={{ textTransform: 'none' }}>
             Back
           </Button>

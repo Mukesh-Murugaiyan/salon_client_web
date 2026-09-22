@@ -19,20 +19,19 @@ const SummaryCard = ({ label, title, value, icon, color = '#6366f1', subtitle })
       elevation={0}
       sx={{
         height: '100%',
-        p: 1,
-        borderRadius: 3,
+        borderRadius: 2.5,
         border: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
         transition: 'all 0.2s ease-in-out',
         '&:hover': {
           borderColor: '#cbd5e1',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+          boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.06)',
         },
       }}
     >
-      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: '#64748b' }}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.25 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: '#64748b', fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}>
             {displayLabel}
           </Typography>
           {icon && (
@@ -40,22 +39,31 @@ const SummaryCard = ({ label, title, value, icon, color = '#6366f1', subtitle })
               sx={{
                 bgcolor: `${color}15`,
                 color: color,
-                width: 44,
-                height: 44,
-                borderRadius: 2.5,
+                width: { xs: 34, sm: 38 },
+                height: { xs: 34, sm: 38 },
+                borderRadius: 2,
               }}
             >
-              {icon}
+              {React.cloneElement(icon, { sx: { fontSize: { xs: 18, sm: 20 } } })}
             </Avatar>
           )}
         </Box>
 
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em', mb: 0.5 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            color: '#0f172a',
+            letterSpacing: '-0.02em',
+            mb: 0.25,
+            fontSize: { xs: '1.25rem', sm: '1.45rem' },
+          }}
+        >
           {value !== undefined && value !== null ? value : '—'}
         </Typography>
 
         {subtitle && (
-          <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>
+          <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500, fontSize: '0.75rem' }}>
             {subtitle}
           </Typography>
         )}

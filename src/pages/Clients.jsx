@@ -241,10 +241,10 @@ const Clients = () => {
       {/* Search Bar & Status Tabs */}
       <Box
         sx={{
-          mb: 3,
+          mb: { xs: 2, sm: 2.5 },
           display: 'flex',
           flexWrap: 'wrap',
-          gap: 2,
+          gap: 1.5,
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
@@ -254,7 +254,7 @@ const Clients = () => {
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: { xs: '100%', sm: 360 }, backgroundColor: '#ffffff' }}
+          sx={{ width: { xs: '100%', sm: 320 }, backgroundColor: '#ffffff' }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -267,16 +267,19 @@ const Clients = () => {
         <Tabs
           value={statusFilter}
           onChange={(e, val) => setStatusFilter(val)}
+          variant="scrollable"
+          scrollButtons="auto"
           sx={{
             backgroundColor: '#ffffff',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
-            minHeight: '36px',
+            minHeight: '34px',
+            width: { xs: '100%', sm: 'auto' },
             '& .MuiTab-root': {
-              minHeight: '36px',
-              py: 0.5,
-              px: 2,
-              fontSize: '0.8125rem',
+              minHeight: '34px',
+              py: 0.25,
+              px: 1.5,
+              fontSize: '0.75rem',
               fontWeight: 600,
               textTransform: 'none',
             },
@@ -300,9 +303,9 @@ const Clients = () => {
           onAction={handleOpenCreate}
         />
       ) : (
-        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          <TableContainer>
-            <Table>
+        <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Client</TableCell>
@@ -469,7 +472,7 @@ const Clients = () => {
               placeholder="olivia@example.com"
             />
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
               <FormControl fullWidth>
                 <InputLabel id="client-gender-label">Gender</InputLabel>
                 <Select
@@ -517,7 +520,7 @@ const Clients = () => {
               label={formData.isActive ? 'Active Client' : 'Inactive Client'}
             />
           </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2 }}>
+          <DialogActions sx={{ px: 2, py: 1.25 }}>
             <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
               Cancel
             </Button>
@@ -653,7 +656,7 @@ const Clients = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
+        <DialogActions sx={{ px: 2, py: 1.25 }}>
           <Button onClick={() => setViewDialogOpen(false)} color="inherit">
             Close
           </Button>

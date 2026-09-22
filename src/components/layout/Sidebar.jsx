@@ -29,20 +29,20 @@ import { useAuth } from '../../context/AuthContext';
 import { usePermission } from '../../hooks/usePermission';
 import { NAVIGATION_ITEMS } from '../../config/navigation';
 
-const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 240;
 
 const ICON_MAP = {
-  Dashboard: <DashboardIcon />,
-  Badge: <BadgeIcon />,
-  Spa: <SpaIcon />,
-  ManageAccounts: <ManageAccountsIcon />,
-  Security: <SecurityIcon />,
-  CalendarMonth: <CalendarMonthIcon />,
-  HowToReg: <HowToRegIcon />,
-  People: <PeopleIcon />,
-  CreditCard: <CreditCardIcon />,
-  Layers: <LayersIcon />,
-  Storefront: <StorefrontIcon />,
+  Dashboard: <DashboardIcon fontSize="small" />,
+  Badge: <BadgeIcon fontSize="small" />,
+  Spa: <SpaIcon fontSize="small" />,
+  ManageAccounts: <ManageAccountsIcon fontSize="small" />,
+  Security: <SecurityIcon fontSize="small" />,
+  CalendarMonth: <CalendarMonthIcon fontSize="small" />,
+  HowToReg: <HowToRegIcon fontSize="small" />,
+  People: <PeopleIcon fontSize="small" />,
+  CreditCard: <CreditCardIcon fontSize="small" />,
+  Layers: <LayersIcon fontSize="small" />,
+  Storefront: <StorefrontIcon fontSize="small" />,
 };
 
 /**
@@ -71,27 +71,27 @@ const Sidebar = ({ mobileOpen, onClose }) => {
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Brand Header */}
-      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.25 }}>
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 42,
-            height: 42,
-            borderRadius: '12px',
+            width: 36,
+            height: 36,
+            borderRadius: '10px',
             background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
             color: '#ffffff',
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+            boxShadow: '0 4px 10px rgba(99, 102, 241, 0.25)',
           }}
         >
-          <SpaIcon fontSize="medium" />
+          <SpaIcon sx={{ fontSize: 20 }} />
         </Box>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2, color: '#0f172a' }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2, color: '#0f172a', fontSize: '0.95rem' }}>
             Salon ERP
           </Typography>
-          <Typography variant="subtitle1" fontWeight={700} noWrap>
+          <Typography variant="caption" sx={{ color: '#64748b', display: 'block', fontWeight: 500 }} noWrap>
             {user?.salon?.name || 'Multi-Tenant SaaS'}
           </Typography>
         </Box>
@@ -100,11 +100,11 @@ const Sidebar = ({ mobileOpen, onClose }) => {
       <Divider sx={{ borderColor: '#f1f5f9' }} />
 
       {/* Navigation Links */}
-      <List sx={{ px: 1.5, py: 2, flexGrow: 1 }}>
+      <List sx={{ px: 1.25, py: 1.25, flexGrow: 1 }}>
         {visibleItems.map((item) => {
           const isSelected = location.pathname === item.route;
           return (
-            <ListItem key={item.value} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={item.value} disablePadding sx={{ mb: 0.35 }}>
               <ListItemButton
                 onClick={() => {
                   navigate(item.route);
@@ -112,9 +112,10 @@ const Sidebar = ({ mobileOpen, onClose }) => {
                 }}
                 selected={isSelected}
                 sx={{
-                  borderRadius: '10px',
-                  py: 1,
-                  px: 1.5,
+                  borderRadius: '8px',
+                  py: 0.65,
+                  px: 1.25,
+                  minHeight: 36,
                   transition: 'all 0.15s ease-in-out',
                   '&.Mui-selected': {
                     backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -128,16 +129,16 @@ const Sidebar = ({ mobileOpen, onClose }) => {
               >
                 <ListItemIcon
                   sx={{
-                    minWidth: 38,
+                    minWidth: 32,
                     color: isSelected ? '#6366f1' : '#64748b',
                   }}
                 >
-                  {ICON_MAP[item.icon] || <DashboardIcon />}
+                  {ICON_MAP[item.icon] || <DashboardIcon fontSize="small" />}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    fontSize: '0.875rem',
+                    fontSize: '0.8125rem',
                     fontWeight: isSelected ? 600 : 500,
                   }}
                 />
@@ -148,9 +149,9 @@ const Sidebar = ({ mobileOpen, onClose }) => {
       </List>
 
       {/* Dynamic Tenant Context Footer Badge */}
-      <Box sx={{ p: 2, m: 2, borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.05em' }}>
+      <Box sx={{ p: 1.5, m: 1.5, borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.35 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.04em', fontSize: '0.65rem' }}>
             TENANT CONTEXT
           </Typography>
           {user?.role?.code && (
@@ -158,8 +159,8 @@ const Sidebar = ({ mobileOpen, onClose }) => {
               size="small"
               label={user.role.name || user.role.code}
               sx={{
-                height: '20px',
-                fontSize: '0.6875rem',
+                height: '18px',
+                fontSize: '0.625rem',
                 fontWeight: 600,
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
                 color: '#6366f1',
@@ -167,10 +168,10 @@ const Sidebar = ({ mobileOpen, onClose }) => {
             />
           )}
         </Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.8125rem' }} noWrap>
           {user?.salon?.name || 'Default Salon'}
         </Typography>
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+        <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.7rem' }}>
           Code: {user?.salon?.code || 'SYSTEM'}
         </Typography>
       </Box>

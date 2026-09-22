@@ -24,22 +24,26 @@ const PageContainer = ({ title, subtitle, action, actions, children }) => {
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
-          gap: 2,
-          mb: 3.5,
+          gap: { xs: 1.5, sm: 2 },
+          mb: { xs: 2, sm: 2.5 },
         }}
       >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em', mb: 0.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', mb: 0.25 }}>
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="body1" sx={{ color: '#64748b' }}>
+            <Typography variant="body2" sx={{ color: '#64748b' }}>
               {subtitle}
             </Typography>
           )}
         </Box>
 
-        {headerActions && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>{headerActions}</Box>}
+        {headerActions && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
+            {headerActions}
+          </Box>
+        )}
       </Box>
 
       {/* Main Content Body */}

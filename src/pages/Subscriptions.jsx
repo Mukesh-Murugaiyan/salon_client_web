@@ -315,22 +315,22 @@ const Subscriptions = () => {
           )}
 
           {/* Main Subscription Overview Card */}
-          <Card sx={{ p: 3, mb: 3, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+          <Card sx={{ p: { xs: 2, sm: 2.5 }, mb: 2.5, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <Box
               sx={{
                 display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },
                 justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', md: 'center' },
-                gap: 2,
-                mb: 3,
+                gap: 1.5,
+                mb: 2,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: 40,
+                    height: 40,
                     borderRadius: 2,
                     bgcolor: isExpired ? 'error.light' : 'primary.light',
                     color: isExpired ? 'error.main' : 'primary.main',
@@ -339,20 +339,21 @@ const Subscriptions = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  <CreditCardIcon fontSize="medium" />
+                  <CreditCardIcon sx={{ fontSize: 22 }} />
                 </Box>
                 <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Typography variant="h5" fontWeight={700}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
                       {subscription?.plan?.name || 'No Active Plan Assigned'}
                     </Typography>
                     <Chip
+                      size="small"
                       label={subscription?.status || 'EXPIRED'}
                       color={isExpired ? 'error' : 'success'}
-                      sx={{ fontWeight: 700, fontSize: '0.8rem' }}
+                      sx={{ fontWeight: 700, fontSize: '0.7rem' }}
                     />
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary">
                     Salon: <strong>{subscription?.salonName}</strong>
                   </Typography>
                 </Box>
@@ -360,7 +361,7 @@ const Subscriptions = () => {
 
               {subscription?.plan && (
                 <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                  <Typography variant="h5" fontWeight={800} color="primary.main">
+                  <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ fontSize: { xs: '1.2rem', sm: '1.35rem' } }}>
                     ${Number(subscription.plan.price).toFixed(2)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -370,15 +371,15 @@ const Subscriptions = () => {
               )}
             </Box>
 
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 1.5 }} />
 
             {/* Schedule & Duration Info */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 1.5 }}>
               <Box>
                 <Typography variant="caption" color="text.secondary">
                   Cycle Start Date
                 </Typography>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography variant="body2" fontWeight={600}>
                   {subscription?.startDate
                     ? new Date(subscription.startDate).toLocaleDateString()
                     : 'Not Started'}
@@ -389,7 +390,7 @@ const Subscriptions = () => {
                 <Typography variant="caption" color="text.secondary">
                   Cycle End Date
                 </Typography>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography variant="body2" fontWeight={600}>
                   {subscription?.endDate
                     ? new Date(subscription.endDate).toLocaleDateString()
                     : 'Not Set'}
@@ -401,7 +402,7 @@ const Subscriptions = () => {
                   Remaining Duration
                 </Typography>
                 <Typography
-                  variant="body1"
+                  variant="body2"
                   fontWeight={700}
                   color={isExpired ? 'error.main' : 'success.main'}
                 >
@@ -412,20 +413,20 @@ const Subscriptions = () => {
           </Card>
 
           {/* Live Quota Usage Cards */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 1.5, sm: 2 }, mb: 3 }}>
             {/* Staff Quota */}
-            <Card sx={{ p: 3, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                <PeopleIcon color="primary" />
+            <Card sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 1.25 }}>
+                <PeopleIcon color="primary" fontSize="small" />
                 <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: '0.85rem' }}>
                     Staff Member Quota
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Active stylists and service specialists
                   </Typography>
                 </Box>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="subtitle1" fontWeight={700}>
                   {subscription?.usage?.staffCount || 0} / {subscription?.usage?.maxStaff || 0}
                 </Typography>
               </Box>
@@ -433,7 +434,7 @@ const Subscriptions = () => {
                 variant="determinate"
                 value={staffUsagePercent}
                 color={staffUsagePercent >= 100 ? 'error' : staffUsagePercent >= 80 ? 'warning' : 'primary'}
-                sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                sx={{ height: 6, borderRadius: 3, mb: 0.75 }}
               />
               <Typography variant="caption" color="text.secondary">
                 {staffUsagePercent}% of plan limit utilized
@@ -441,18 +442,18 @@ const Subscriptions = () => {
             </Card>
 
             {/* Appointments Quota */}
-            <Card sx={{ p: 3, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                <EventNoteIcon color="secondary" />
+            <Card sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 1.25 }}>
+                <EventNoteIcon color="secondary" fontSize="small" />
                 <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: '0.85rem' }}>
                     Appointments Quota
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Bookings scheduled in current billing cycle
                   </Typography>
                 </Box>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="subtitle1" fontWeight={700}>
                   {subscription?.usage?.appointmentsCount || 0} / {subscription?.usage?.maxAppointments || 0}
                 </Typography>
               </Box>
@@ -460,7 +461,7 @@ const Subscriptions = () => {
                 variant="determinate"
                 value={appUsagePercent}
                 color={appUsagePercent >= 100 ? 'error' : appUsagePercent >= 80 ? 'warning' : 'secondary'}
-                sx={{ height: 8, borderRadius: 4, mb: 1 }}
+                sx={{ height: 6, borderRadius: 3, mb: 0.75 }}
               />
               <Typography variant="caption" color="text.secondary">
                 {appUsagePercent}% of cycle bookings utilized
@@ -605,7 +606,7 @@ const Subscriptions = () => {
                 ))}
               </RadioGroup>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 2 }}>
+            <DialogActions sx={{ px: 2, py: 1.25 }}>
               <Button onClick={() => setPlanDialogOpen(false)} disabled={isUpgrading} sx={{ textTransform: 'none' }}>
                 Cancel
               </Button>
@@ -634,7 +635,7 @@ const Subscriptions = () => {
                 <strong>${Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
               </Typography>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 2 }}>
+            <DialogActions sx={{ px: 2, py: 1.25 }}>
               <Button onClick={() => setRenewDialogOpen(false)} disabled={isRenewing} sx={{ textTransform: 'none' }}>
                 Cancel
               </Button>

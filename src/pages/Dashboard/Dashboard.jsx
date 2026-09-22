@@ -109,8 +109,8 @@ const Dashboard = () => {
       ) : (
         <Box>
           {/* Top Metric Cards */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, sm: 2.5 } }}>
+            <Grid item xs={6} sm={6} md={3}>
               <SummaryCard
                 label="Today's Appointments"
                 value={summary?.todayAppointments ?? 0}
@@ -119,7 +119,7 @@ const Dashboard = () => {
                 subtitle="Booked for today"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <SummaryCard
                 label="Confirmed Bookings"
                 value={summary?.confirmedAppointments ?? 0}
@@ -128,7 +128,7 @@ const Dashboard = () => {
                 subtitle="Ready for service"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <SummaryCard
                 label="Active Clients"
                 value={summary?.activeClients ?? 0}
@@ -137,7 +137,7 @@ const Dashboard = () => {
                 subtitle="Total registered"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <SummaryCard
                 label="Salon Users"
                 value={summary?.staffCount ?? 0}
@@ -149,25 +149,25 @@ const Dashboard = () => {
           </Grid>
 
           {/* Operational Module Cards */}
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {/* Quick Actions & Navigation Module */}
             <Grid item xs={12} md={8}>
               <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b', mb: 1 }}>
+                <CardContent sx={{ p: { xs: 1.75, sm: 2.25 } }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1e293b', mb: 0.5 }}>
                     Quick Management
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.8125rem' }}>
                     Access your authorized operational modules:
                   </Typography>
 
-                  <Grid container spacing={2}>
+                  <Grid container spacing={1.5}>
                     {can('appointments', 'view') && (
                       <Grid item xs={12} sm={6}>
                         <Card
                           variant="outlined"
                           sx={{
-                            p: 2,
+                            p: 1.5,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
@@ -176,9 +176,9 @@ const Dashboard = () => {
                           onClick={() => navigate(ROUTES.APPOINTMENTS.value)}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <CalendarIcon sx={{ color: '#6366f1' }} />
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                              <CalendarIcon sx={{ color: '#6366f1', fontSize: 20 }} />
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                                 Appointments
                               </Typography>
                             </Box>
@@ -193,7 +193,7 @@ const Dashboard = () => {
                         <Card
                           variant="outlined"
                           sx={{
-                            p: 2,
+                            p: 1.5,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
@@ -202,9 +202,9 @@ const Dashboard = () => {
                           onClick={() => navigate(ROUTES.CLIENTS.value)}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <PeopleIcon sx={{ color: '#10b981' }} />
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                              <PeopleIcon sx={{ color: '#10b981', fontSize: 20 }} />
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                                 Clients
                               </Typography>
                             </Box>
@@ -219,7 +219,7 @@ const Dashboard = () => {
                         <Card
                           variant="outlined"
                           sx={{
-                            p: 2,
+                            p: 1.5,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
@@ -228,9 +228,9 @@ const Dashboard = () => {
                           onClick={() => navigate(ROUTES.USERS.value)}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <BadgeIcon sx={{ color: '#ec4899' }} />
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                              <BadgeIcon sx={{ color: '#ec4899', fontSize: 20 }} />
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                                 Users & Staff
                               </Typography>
                             </Box>
@@ -245,7 +245,7 @@ const Dashboard = () => {
                         <Card
                           variant="outlined"
                           sx={{
-                            p: 2,
+                            p: 1.5,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
@@ -254,9 +254,9 @@ const Dashboard = () => {
                           onClick={() => navigate(ROUTES.ROLES.value)}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <SecurityIcon sx={{ color: '#8b5cf6' }} />
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                              <SecurityIcon sx={{ color: '#8b5cf6', fontSize: 20 }} />
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
                                 Roles & Permissions
                               </Typography>
                             </Box>
@@ -273,7 +273,7 @@ const Dashboard = () => {
             {/* Tenant & Permissions Status Card */}
             <Grid item xs={12} md={4}>
               <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 3 }}>
+                <CardContent sx={{ p: { xs: 1.75, sm: 2.25 } }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', mb: 2 }}>
                     Assigned Permissions
                   </Typography>
