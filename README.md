@@ -89,6 +89,16 @@ UI Navigation & Page Access
    - Soft delete service with confirmation prompt.
    - Zero hardcoded services: 100% database-driven and isolated to the authenticated company.
    - Permission-governed controls (`services:view`, `services:create`, `services:update`, `services:delete`).
+8. **Appointment Management (`/appointments`) — Ticket 7**:
+   - Interactive salon booking management with calendar-style table and date/staff/status filtering.
+   - Dynamic summary metrics (Total Bookings, Confirmed, Completed, Cancelled).
+   - Dynamic loading of active Clients, Staff, and Services from server APIs.
+   - Add/Edit Appointment dialogs with business hours validation (09:00–20:00) and auto-calculated end times based on selected service durations.
+   - Staff overlap conflict detection preventing duplicate active bookings on the same staff member and date.
+   - Cancelled appointments do not block staff scheduling.
+   - Status transition menu (Confirmed, Pending, Completed, Cancelled).
+   - Detailed Appointment overview modal with client, service, staff, and schedule information.
+   - Permission-governed controls (`appointments:view`, `appointments:create`, `appointments:update`, `appointments:delete`).
 
 ---
 
