@@ -31,6 +31,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Search as SearchIcon,
   Storefront as StorefrontIcon,
+  MyLocation as MyLocationIcon,
 } from '@mui/icons-material';
 import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
@@ -58,8 +59,8 @@ const Salons = () => {
     phone: '',
     address: '',
     allowedRadiusInMeters: 100,
-    openingTime: '09:00',
-    closingTime: '20:00',
+    openingTime: "",
+    closingTime: "",
     isActive: true,
   });
   const [dialogError, setDialogError] = useState('');
@@ -115,8 +116,8 @@ const Salons = () => {
       latitude: '',
       longitude: '',
       allowedRadiusInMeters: 100,
-      openingTime: '09:00',
-      closingTime: '20:00',
+      openingTime: '',
+      closingTime: '',
       isActive: true,
     });
     setDialogError('');
@@ -134,8 +135,8 @@ const Salons = () => {
       latitude: salon.latitude != null ? salon.latitude : '',
       longitude: salon.longitude != null ? salon.longitude : '',
       allowedRadiusInMeters: salon.allowedRadiusInMeters || 100,
-      openingTime: salon.openingTime || '09:00',
-      closingTime: salon.closingTime || '20:00',
+      openingTime: salon.openingTime || '',
+      closingTime: salon.closingTime || '',
       isActive: salon.isActive,
     });
     setDialogError('');
@@ -146,6 +147,26 @@ const Salons = () => {
     setDialogOpen(false);
     setEditingSalon(null);
     setDialogError('');
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setDialogError('Geolocation is not supported by your browser.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: String(pos.coords.latitude.toFixed(6)),
+          longitude: String(pos.coords.longitude.toFixed(6)),
+        }));
+      },
+      (err) => {
+        setDialogError('Failed to retrieve current location: ' + err.message);
+      },
+      { enableHighAccuracy: true }
+    );
   };
   console.log("formData------", formData)
   const handleSubmit = async (e) => {
@@ -314,9 +335,6 @@ const Salons = () => {
         )
       }
     >
-      <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
-        Platform Admin Area: Restricted strictly to <strong>SUPER_ADMIN</strong>.
-      </Alert>
 
       {actionSuccess && (
         <Alert severity="success" onClose={() => setActionSuccess('')} sx={{ mb: 3 }}>
@@ -490,34 +508,58 @@ const Salons = () => {
               placeholder="123 Salon Avenue, Suite 100"
             />
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <Box sx={{ p: 2, borderRadius: 2, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                  Salon Geo-Fence Settings
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.8125rem' }}>
+                  Configure the physical GPS coordinates and allowable radius for this salon. Check-in requests beyond this radius are automatically rejected by the server Haversine formula.
+                </Typography>
+              </Box>
+
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<MyLocationIcon />}
+                onClick={handleUseCurrentLocation}
+                sx={{ alignSelf: 'flex-start', textTransform: 'none', borderRadius: '8px', color: '#6366f1', borderColor: '#cbd5e1' }}
+              >
+                Use My Current Device Location
+              </Button>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <TextField
+                  label="Latitude (-90 to 90)"
+                  required
+                  fullWidth
+                  value={formData.latitude}
+                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                  inputProps={{ inputMode: 'decimal' }}
+                  placeholder="e.g. 37.7749"
+                />
+                <TextField
+                  label="Longitude (-180 to 180)"
+                  required
+                  fullWidth
+                  value={formData.longitude}
+                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                  inputProps={{ inputMode: 'decimal' }}
+                  placeholder="e.g. -122.4194"
+                />
+              </Box>
+
               <TextField
-                label="Latitude"
+                label="Allowed Radius (Meters)"
+                type="number"
+                required
                 fullWidth
-                value={formData.latitude}
-                onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                inputProps={{ inputMode: 'decimal' }}
-                placeholder="e.g. 37.7749"
-              />
-              <TextField
-                label="Longitude"
-                fullWidth
-                value={formData.longitude}
-                onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                inputProps={{ inputMode: 'decimal' }}
-                placeholder="e.g. -122.4194"
+                value={formData.allowedRadiusInMeters}
+                onChange={(e) => setFormData({ ...formData, allowedRadiusInMeters: e.target.value })}
+                helperText="Maximum allowed distance between employee device and salon coordinates (e.g. 100 or 200m)."
+                inputProps={{ min: 1 }}
               />
             </Box>
-
-            <TextField
-              label="Geo-Fencing Radius (Meters)"
-              type="number"
-              fullWidth
-              value={formData.allowedRadiusInMeters}
-              onChange={(e) => setFormData({ ...formData, allowedRadiusInMeters: e.target.value })}
-              helperText="Allowed check-in radius for staff attendance"
-              inputProps={{ min: 10 }}
-            />
 
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
               <TextField
