@@ -43,9 +43,12 @@ import EmptyState from '../components/common/EmptyState';
 import { usePermission } from '../hooks/usePermission';
 import { subscriptionApi } from '../api/subscriptionApi';
 import { plansApi } from '../api/plansApi';
+import salonsApi from '../api/salonsApi';
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 const Subscriptions = () => {
-  const { can } = usePermission();
+  const { can, user } = usePermission();
+  const isSuperAdmin = !user?.salonId;
 
   const [subscription, setSubscription] = useState(null);
   const [history, setHistory] = useState([]);
@@ -65,13 +68,24 @@ const Subscriptions = () => {
   const [renewDialogOpen, setRenewDialogOpen] = useState(false);
   const [isRenewing, setIsRenewing] = useState(false);
 
-  const fetchSubscriptionData = useCallback(async () => {
+  // Super Admin Selector State
+  const [allSalons, setAllSalons] = useState([]);
+  const [selectedContextSalonId, setSelectedContextSalonId] = useState('');
+
+  const fetchSubscriptionData = useCallback(async (salonIdOverride) => {
+    if (isSuperAdmin && !salonIdOverride) {
+      setIsLoading(false);
+      setSubscription(null);
+      setHistory([]);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const [subRes, historyRes, plansRes] = await Promise.all([
-        subscriptionApi.getCurrentSubscription(),
-        subscriptionApi.getSubscriptionHistory().catch(() => ({ history: [] })),
+        subscriptionApi.getCurrentSubscription(salonIdOverride),
+        subscriptionApi.getSubscriptionHistory(salonIdOverride).catch(() => ({ history: [] })),
         plansApi.listPlans({ isActive: true }).catch(() => ({ plans: [] })),
       ]);
 
@@ -87,11 +101,19 @@ const Subscriptions = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isSuperAdmin]);
 
   useEffect(() => {
-    fetchSubscriptionData();
-  }, [fetchSubscriptionData]);
+    if (isSuperAdmin) {
+      salonsApi.listSalons({ limit: 100 })
+        .then(res => setAllSalons(res.salons || []))
+        .catch(err => console.error('[Subscriptions] Failed to load salons', err));
+    }
+  }, [isSuperAdmin]);
+
+  useEffect(() => {
+    fetchSubscriptionData(selectedContextSalonId);
+  }, [fetchSubscriptionData, selectedContextSalonId]);
 
   // Open Assign / Upgrade Modal
   const handleOpenPlanModal = () => {
@@ -115,15 +137,15 @@ const Subscriptions = () => {
     setPlanDialogError('');
     try {
       if (subscription?.plan) {
-        await subscriptionApi.upgradePlan(selectedPlanId);
+        await subscriptionApi.upgradePlan(selectedPlanId, selectedContextSalonId);
         setActionSuccess('Plan upgraded successfully.');
       } else {
-        await subscriptionApi.assignPlan(selectedPlanId);
+        await subscriptionApi.assignPlan(selectedPlanId, selectedContextSalonId);
         setActionSuccess('Plan assigned successfully.');
       }
 
       setPlanDialogOpen(false);
-      await fetchSubscriptionData();
+      await fetchSubscriptionData(selectedContextSalonId);
     } catch (err) {
       console.error('[Subscriptions] Plan change error:', err);
       setPlanDialogError(err.response?.data?.message || 'Failed to update plan.');
@@ -136,15 +158,30 @@ const Subscriptions = () => {
   const handleConfirmRenew = async () => {
     setIsRenewing(true);
     try {
-      await subscriptionApi.renewSubscription();
+      await subscriptionApi.renewSubscription(selectedContextSalonId);
       setActionSuccess('Subscription renewed successfully for another billing cycle.');
       setRenewDialogOpen(false);
-      await fetchSubscriptionData();
+      await fetchSubscriptionData(selectedContextSalonId);
     } catch (err) {
       console.error('[Subscriptions] Renew error:', err);
       setError(err.response?.data?.message || 'Failed to renew subscription.');
     } finally {
       setIsRenewing(false);
+    }
+  };
+
+  const handleRemovePlan = async () => {
+    if (!window.confirm('Are you sure you want to completely remove this subscription plan? This will immediately revoke access and expire the status.')) return;
+    
+    setIsLoading(true);
+    try {
+      await subscriptionApi.removePlan(selectedContextSalonId);
+      setActionSuccess('Subscription plan removed successfully.');
+      await fetchSubscriptionData(selectedContextSalonId);
+    } catch (err) {
+      console.error('[Subscriptions] Remove error:', err);
+      setError(err.response?.data?.message || 'Failed to remove subscription.');
+      setIsLoading(false);
     }
   };
 
@@ -192,6 +229,17 @@ const Subscriptions = () => {
             </Button>
           )}
 
+          {subscription?.plan && isSuperAdmin && (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleRemovePlan}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              Remove Plan
+            </Button>
+          )}
+
           {(can('subscription', 'assign') || can('subscription', 'upgrade')) && (
             <Button
               variant="contained"
@@ -207,12 +255,41 @@ const Subscriptions = () => {
         </Box>
       }
     >
-      {/* Action Success Alert */}
-      {actionSuccess && (
-        <Alert severity="success" onClose={() => setActionSuccess('')} sx={{ mb: 3 }}>
-          {actionSuccess}
-        </Alert>
+      {isSuperAdmin && (
+        <Card sx={{ p: 2, mb: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 2 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel>Select Salon Context</InputLabel>
+            <Select
+              value={selectedContextSalonId}
+              label="Select Salon Context"
+              onChange={(e) => setSelectedContextSalonId(e.target.value)}
+            >
+              <MenuItem value="" disabled>Select a Salon...</MenuItem>
+              {allSalons.map(s => (
+                <MenuItem key={s.id || s._id} value={s.id || s._id}>
+                  {s.name} ({s.code})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Card>
       )}
+
+      {isSuperAdmin && !selectedContextSalonId && (
+        <EmptyState
+          title="No Salon Selected"
+          description="Please select a salon from the dropdown above to view and manage its subscription."
+        />
+      )}
+
+      {(selectedContextSalonId || !isSuperAdmin) && (
+        <>
+          {/* Action Success Alert */}
+          {actionSuccess && (
+            <Alert severity="success" onClose={() => setActionSuccess('')} sx={{ mb: 3 }}>
+              {actionSuccess}
+            </Alert>
+          )}
 
       {/* Expired Subscription Warning Banner */}
       {isExpired && (
@@ -276,7 +353,7 @@ const Subscriptions = () => {
                 />
               </Box>
               <Typography variant="body2" color="text.secondary">
-                Company: <strong>{subscription?.companyName}</strong>
+                Salon: <strong>{subscription?.salonName}</strong>
               </Typography>
             </Box>
           </Box>
@@ -328,7 +405,7 @@ const Subscriptions = () => {
               fontWeight={700}
               color={isExpired ? 'error.main' : 'success.main'}
             >
-              {isExpired ? '0 days (Expired)' : `${subscription?.remainingDays || 0} days left`}
+              {isExpired ? '0 days (Expired)' : `${subscription?.daysRemaining || 0} days left`}
             </Typography>
           </Box>
         </Box>
@@ -407,7 +484,7 @@ const Subscriptions = () => {
         {history.length === 0 ? (
           <EmptyState
             title="No Subscription History"
-            description="No subscription assignments or renewals have occurred yet for this company."
+            description="No subscription assignments or renewals have occurred yet for this salon."
           />
         ) : (
           <TableContainer>
@@ -573,6 +650,8 @@ const Subscriptions = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </PageContainer>
   );
 };

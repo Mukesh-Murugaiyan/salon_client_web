@@ -8,10 +8,13 @@ import { Box, Typography } from '@mui/material';
  * @param {Object} props
  * @param {string} props.title - Main page title
  * @param {string} [props.subtitle] - Explanatory subtitle
- * @param {React.ReactNode} [props.actions] - Header action buttons / filters
+ * @param {React.ReactNode} [props.action] - Header action button (singular alias)
+ * @param {React.ReactNode} [props.actions] - Header action buttons (plural alias)
  * @param {React.ReactNode} props.children - Page content
  */
-const PageContainer = ({ title, subtitle, actions, children }) => {
+const PageContainer = ({ title, subtitle, action, actions, children }) => {
+  // Support both `action` (singular) and `actions` (plural) prop names
+  const headerActions = actions ?? action;
   return (
     <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto' }}>
       {/* Header Bar */}
@@ -36,7 +39,7 @@ const PageContainer = ({ title, subtitle, actions, children }) => {
           )}
         </Box>
 
-        {actions && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>{actions}</Box>}
+        {headerActions && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>{headerActions}</Box>}
       </Box>
 
       {/* Main Content Body */}

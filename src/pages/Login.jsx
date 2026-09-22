@@ -77,8 +77,8 @@ const Login = () => {
         (err.response?.status === 401
           ? 'Invalid email or password.'
           : err.response?.status === 403
-          ? 'Your account is disabled. Please contact the administrator.'
-          : 'Unable to connect to the authentication service. Please check backend server.');
+            ? 'Your account is disabled. Please contact the administrator.'
+            : 'Unable to connect to the authentication service. Please check backend server.');
       setErrorMessage(apiMessage);
     } finally {
       setIsSubmitting(false);
@@ -86,7 +86,7 @@ const Login = () => {
   };
 
   const handleFillSeedAdmin = () => {
-    setEmail('admin@example.com');
+    setEmail('superadmin@salon.com');
     setPassword('Admin@123');
     setErrorMessage('');
     setFieldErrors({});
@@ -246,7 +246,7 @@ const Login = () => {
           {/* Quick seed admin fill button */}
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Chip
-              label="Fill Seed Admin (admin@example.com)"
+              label="Fill Seed Admin (superadmin@salon.com)"
               variant="outlined"
               size="small"
               onClick={handleFillSeedAdmin}

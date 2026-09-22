@@ -43,12 +43,14 @@ import EmptyState from '../../components/common/EmptyState';
 import { usePermission } from '../../hooks/usePermission';
 import userApi from '../../api/userApi';
 import roleApi from '../../api/roleApi';
+import salonsApi from '../../api/salonsApi';
 
 const UserList = () => {
   const { can } = usePermission();
 
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [salons, setSalons] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +62,7 @@ const UserList = () => {
     name: '',
     email: '',
     password: '',
+    salonId: '',
     roleId: '',
     isActive: true,
   });
@@ -71,14 +74,19 @@ const UserList = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [usersRes, rolesRes] = await Promise.all([
+      const [usersRes, rolesRes, salonsRes] = await Promise.all([
         userApi.listUsers(),
         roleApi.listRoles(),
+        salonsApi.listSalons({ limit: 100 }).catch((e) => {
+          console.warn('[UserList] Failed to load salons:', e);
+          return { salons: [] };
+        }),
       ]);
       setUsers(usersRes.users || []);
       setRoles(rolesRes.roles || []);
+      setSalons(salonsRes.salons || []);
     } catch (err) {
-      console.error('[UserList] Failed to load users/roles:', err);
+      console.error('[UserList] Failed to load users/roles/salons:', err);
       setError(err.response?.data?.message || 'Failed to load users.');
     } finally {
       setIsLoading(false);
@@ -95,7 +103,8 @@ const UserList = () => {
       name: '',
       email: '',
       password: '',
-      roleId: roles.length > 0 ? roles[0].id : '',
+      salonId: '',
+      roleId: roles.length > 0 ? (roles[0].id || roles[0]._id) : '',
       isActive: true,
     });
     setDialogError('');
@@ -104,10 +113,12 @@ const UserList = () => {
 
   const handleOpenEdit = (user) => {
     setEditingUser(user);
+    const userSalonId = user.salonId || (typeof user.salon === 'object' ? user.salon?.id : user.salon) || '';
     setFormData({
       name: user.name,
       email: user.email,
       password: '',
+      salonId: userSalonId,
       roleId: user.roleId || (typeof user.role === 'object' ? user.role?.id : '') || '',
       isActive: user.isActive,
     });
@@ -132,6 +143,7 @@ const UserList = () => {
         const updatePayload = {
           name: formData.name,
           email: formData.email,
+          salonId: formData.salonId || null,
           roleId: formData.roleId,
           isActive: formData.isActive,
         };
@@ -146,6 +158,7 @@ const UserList = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          salonId: formData.salonId || null,
           roleId: formData.roleId,
           isActive: formData.isActive,
         });
@@ -176,17 +189,21 @@ const UserList = () => {
   const filteredUsers = users.filter((u) => {
     const term = searchQuery.toLowerCase();
     const roleName = typeof u.role === 'object' ? u.role?.name : u.role;
+    const salonObj = typeof u.salon === 'object' ? u.salon : null;
+    const salonMatch = salons.find((s) => (s._id || s.id) === (u.salonId || u.salon));
+    const salonName = salonObj?.name || salonMatch?.name || '';
     return (
       u.name?.toLowerCase().includes(term) ||
       u.email?.toLowerCase().includes(term) ||
-      roleName?.toLowerCase().includes(term)
+      roleName?.toLowerCase().includes(term) ||
+      salonName?.toLowerCase().includes(term)
     );
   });
 
   return (
     <PageContainer
       title="User Management"
-      subtitle="Manage company staff, assignments, and account statuses"
+      subtitle="Manage salon staff, assignments, and account statuses"
       action={
         can('users', 'create') && (
           <Button
@@ -216,7 +233,7 @@ const UserList = () => {
       {/* Search Bar */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <TextField
-          placeholder="Search by name, email, or role..."
+          placeholder="Search by name, email, salon, or role..."
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -232,13 +249,13 @@ const UserList = () => {
       </Box>
 
       {isLoading ? (
-        <LoadingState message="Loading company users..." />
+        <LoadingState message="Loading salon users..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchUsersAndRoles} />
       ) : filteredUsers.length === 0 ? (
         <EmptyState
           title="No users found"
-          description={searchQuery ? 'No users matching your search term.' : 'Get started by creating your first company user.'}
+          description={searchQuery ? 'No users matching your search term.' : 'Get started by creating your first salon user.'}
           actionLabel={can('users', 'create') && !searchQuery ? 'Create User' : undefined}
           onAction={handleOpenCreate}
         />
@@ -250,7 +267,7 @@ const UserList = () => {
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Name</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Company</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Salon</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Assigned Role</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Created Date</TableCell>
@@ -261,7 +278,9 @@ const UserList = () => {
                 {filteredUsers.map((u) => {
                   const roleObj = typeof u.role === 'object' ? u.role : null;
                   const roleLabel = roleObj?.name || roleObj?.code || u.role || 'Unassigned';
-                  const companyLabel = typeof u.company === 'object' ? u.company?.name : u.company || 'Demo Company';
+                  const salonObj = typeof u.salon === 'object' ? u.salon : null;
+                  const salonMatch = salons.find((s) => (s._id || s.id) === (u.salonId || u.salon));
+                  const companyLabel = salonObj?.name || salonMatch?.name || (u.salonId ? 'Assigned' : 'Platform / Global');
 
                   return (
                     <TableRow key={u.id} hover>
@@ -384,6 +403,25 @@ const UserList = () => {
               helperText={!editingUser ? 'Minimum 6 characters' : undefined}
             />
 
+            <FormControl fullWidth>
+              <InputLabel id="salon-select-label">Assign Salon</InputLabel>
+              <Select
+                labelId="salon-select-label"
+                label="Assign Salon"
+                value={formData.salonId}
+                onChange={(e) => setFormData({ ...formData, salonId: e.target.value })}
+              >
+                <MenuItem value="">
+                  <em>None (Platform / Global)</em>
+                </MenuItem>
+                {salons.map((s) => (
+                  <MenuItem key={s._id || s.id} value={s._id || s.id}>
+                    {s.name} ({s.code})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <FormControl fullWidth required>
               <InputLabel id="role-select-label">Assign Role</InputLabel>
               <Select
@@ -393,8 +431,8 @@ const UserList = () => {
                 onChange={(e) => setFormData({ ...formData, roleId: e.target.value })}
               >
                 {roles.map((r) => (
-                  <MenuItem key={r.id} value={r.id}>
-                    {r.name} ({r.code})
+                  <MenuItem key={r.id || r._id} value={r.id || r._id}>
+                    {r.name} {r.code ? `(${r.code})` : ''}
                   </MenuItem>
                 ))}
               </Select>

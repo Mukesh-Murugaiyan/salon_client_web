@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { useCallback } from 'react';
 import { can as canCheck, hasPermission as hasPermissionCheck, hasAnyPermission as hasAnyCheck } from '../utils/permission.utils';
 
 /**
@@ -11,10 +12,14 @@ import { can as canCheck, hasPermission as hasPermissionCheck, hasAnyPermission 
 export const usePermission = () => {
   const { user } = useAuth();
 
+  const can = useCallback((moduleName, actionName) => canCheck(user, moduleName, actionName), [user]);
+  const hasPermission = useCallback((permission) => hasPermissionCheck(user, permission), [user]);
+  const hasAnyPermission = useCallback((...permissions) => hasAnyCheck(user, ...permissions), [user]);
+
   return {
-    can: (moduleName, actionName) => canCheck(user, moduleName, actionName),
-    hasPermission: (permission) => hasPermissionCheck(user, permission),
-    hasAnyPermission: (...permissions) => hasAnyCheck(user, ...permissions),
+    can,
+    hasPermission,
+    hasAnyPermission,
     permissions: user?.permissions || [],
     user,
   };

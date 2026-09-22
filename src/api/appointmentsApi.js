@@ -65,4 +65,27 @@ export const appointmentsApi = {
     const response = await httpClient.patch(`/appointments/${id}/status`, { status });
     return response.data;
   },
+
+  /**
+   * Returns DB-level active counts for clients, staff, and services.
+   * Use this to determine if booking is possible (canBook) without
+   * fetching full resource lists.
+   * Requires: appointments:create permission.
+   * @returns {Promise<{ success: boolean, clientsCount: number, staffCount: number, servicesCount: number, canBook: boolean }>}
+   */
+  async getReadiness() {
+    const response = await httpClient.get('/appointments/readiness');
+    return response.data;
+  },
+
+  /**
+   * Returns minimal id+name lists for clients, staff, and services —
+   * only what is needed to populate booking form dropdowns.
+   * Requires: appointments:create permission.
+   * @returns {Promise<{ success: boolean, clients: Array, staff: Array, services: Array }>}
+   */
+  async getFormData() {
+    const response = await httpClient.get('/appointments/form-data');
+    return response.data;
+  },
 };

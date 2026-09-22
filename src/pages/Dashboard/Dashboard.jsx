@@ -60,7 +60,7 @@ const Dashboard = () => {
     fetchMetrics();
   }, [fetchMetrics]);
 
-  const companyLabel = user?.company?.name || summary?.companyName || summary?.salonName || 'My Salon';
+  const companyLabel = user?.salon?.name || summary?.salonName || 'My Salon';
   const roleLabel = user?.role?.name || user?.role?.code || 'Staff';
 
   return (
@@ -139,7 +139,7 @@ const Dashboard = () => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <SummaryCard
-                title="Company Users"
+                title="Salon Users"
                 value={summary?.staffCount ?? 1}
                 icon="Badge"
                 color="#ec4899"
@@ -285,7 +285,7 @@ const Dashboard = () => {
                       {roleLabel}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Company: {companyLabel}
+                      Salon: {companyLabel}
                     </Typography>
                   </Box>
 

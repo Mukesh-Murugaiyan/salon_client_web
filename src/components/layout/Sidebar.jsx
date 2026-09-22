@@ -91,8 +91,8 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2, color: '#0f172a' }}>
             Salon ERP
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-            {user?.company?.name || 'Multi-Tenant SaaS'}
+          <Typography variant="subtitle1" fontWeight={700} noWrap>
+            {user?.salon?.name || 'Multi-Tenant SaaS'}
           </Typography>
         </Box>
       </Box>
@@ -168,10 +168,10 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           )}
         </Box>
         <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-          {user?.company?.name || 'Default Company'}
+          {user?.salon?.name || 'Default Salon'}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-          Code: {user?.company?.code || 'SYSTEM'}
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+          Code: {user?.salon?.code || 'SYSTEM'}
         </Typography>
       </Box>
     </Box>

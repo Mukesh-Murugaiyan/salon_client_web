@@ -78,10 +78,10 @@ export const NAVIGATION_ITEMS = [
     icon: 'Layers',
   },
   {
-    label: 'Companies',
-    value: 'companies',
+    label: 'Salons',
+    value: 'salons',
     route: ROUTES.ADMIN_SALONS.value,
-    requiredPermission: 'companies:view',
+    requiredPermission: 'salons:view',
     icon: 'Storefront',
   },
 ];

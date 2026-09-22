@@ -51,9 +51,6 @@ import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
 import { usePermission } from '../hooks/usePermission';
 import { appointmentsApi } from '../api/appointmentsApi';
-import { clientApi } from '../api/clientApi';
-import { staffApi } from '../api/staffApi';
-import { servicesApi } from '../api/servicesApi';
 import {
   APPOINTMENT_STATUS,
   STATUS_CONFIG,
@@ -67,6 +64,10 @@ const Appointments = () => {
   const { can } = usePermission();
 
   const [appointments, setAppointments] = useState([]);
+  // Readiness: DB-level counts via /appointments/readiness (no full list fetched)
+  const [readiness, setReadiness] = useState({ canBook: false, clientsCount: 0, staffCount: 0, servicesCount: 0 });
+  const [readinessError, setReadinessError] = useState(null);
+  // Form data: minimal id+name lists for dropdowns, loaded only when dialog opens
   const [clients, setClients] = useState([]);
   const [staffMembers, setStaffMembers] = useState([]);
   const [services, setServices] = useState([]);
@@ -109,19 +110,39 @@ const Appointments = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuAppointment, setMenuAppointment] = useState(null);
 
-  // Fetch all dependencies (Clients, Staff, Services) and Appointments
-  const loadDependencies = useCallback(async () => {
+  /**
+   * Fetch readiness: uses DB-level countDocuments via /appointments/readiness.
+   * Does NOT call clients/staff/services list APIs.
+   */
+  const fetchReadiness = useCallback(async () => {
+    setReadinessError(null);
     try {
-      const [clientsRes, staffRes, servicesRes] = await Promise.all([
-        clientApi.listClients(),
-        staffApi.listStaff(),
-        servicesApi.listServices(),
-      ]);
-      setClients(clientsRes.clients?.filter((c) => c.isActive) || []);
-      setStaffMembers(staffRes.staff?.filter((s) => s.isActive) || []);
-      setServices(servicesRes.services?.filter((s) => s.isActive) || []);
+      const res = await appointmentsApi.getReadiness();
+      setReadiness({
+        canBook: res.canBook,
+        clientsCount: res.clientsCount,
+        staffCount: res.staffCount,
+        servicesCount: res.servicesCount,
+      });
     } catch (err) {
-      console.error('[Appointments] Dependency loading error:', err);
+      // 403 stays as a permission error — not silently converted to canBook=false
+      console.error('[Appointments] Readiness check failed:', err);
+      setReadinessError(err.response?.data?.message || 'Could not load booking readiness.');
+    }
+  }, []);
+
+  /**
+   * Load minimal form data (id+name only) for dropdowns.
+   * Called lazily only when the booking dialog is opened.
+   */
+  const loadFormData = useCallback(async () => {
+    try {
+      const res = await appointmentsApi.getFormData();
+      setClients(res.clients || []);
+      setStaffMembers(res.staff || []);
+      setServices(res.services || []);
+    } catch (err) {
+      console.error('[Appointments] Form data load failed:', err);
     }
   }, []);
 
@@ -145,8 +166,8 @@ const Appointments = () => {
   }, [selectedDate, selectedStaffId, statusFilter]);
 
   useEffect(() => {
-    loadDependencies();
-  }, [loadDependencies]);
+    fetchReadiness();
+  }, [fetchReadiness]);
 
   useEffect(() => {
     fetchAppointments();
@@ -189,13 +210,13 @@ const Appointments = () => {
     return { total, confirmed, completed, cancelled };
   }, [appointments]);
 
-  // Open Book Dialog
-  const handleOpenCreate = () => {
+  // Open Book Dialog — load form data lazily on first open
+  const handleOpenCreate = async () => {
     setEditingAppointment(null);
     setFormData({
-      clientId: clients[0]?.id || '',
-      staffId: staffMembers[0]?.id || '',
-      serviceId: services[0]?.id || '',
+      clientId: '',
+      staffId: '',
+      serviceId: '',
       date: selectedDate || getTodayString(),
       startTime: '10:00',
       notes: '',
@@ -203,10 +224,12 @@ const Appointments = () => {
     });
     setDialogError('');
     setDialogOpen(true);
+    // Load dropdown data only when dialog is opened
+    await loadFormData();
   };
 
   // Open Edit Dialog
-  const handleOpenEdit = (app) => {
+  const handleOpenEdit = async (app) => {
     setEditingAppointment(app);
     setFormData({
       clientId: app.client?.id || app.client?._id || '',
@@ -219,6 +242,8 @@ const Appointments = () => {
     });
     setDialogError('');
     setDialogOpen(true);
+    // Load dropdown data lazily when dialog opens
+    await loadFormData();
   };
 
   // Open View Dialog
@@ -325,14 +350,15 @@ const Appointments = () => {
     <PageContainer
       title="Appointments"
       subtitle="Salon booking schedule, staff assignments, and calendar management"
-      actions={
+      action={
         can('appointments', 'create') && (
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
             onClick={handleOpenCreate}
-            disabled={clients.length === 0 || staffMembers.length === 0 || services.length === 0}
+            disabled={!readiness.canBook}
+            title={!readiness.canBook ? 'Add active clients, staff, and services first' : undefined}
             sx={{ textTransform: 'none', fontWeight: 600, px: 2.5 }}
           >
             Book Appointment
@@ -340,10 +366,20 @@ const Appointments = () => {
         )
       }
     >
-      {/* Prerequisite Alert if no staff/services/clients */}
-      {(clients.length === 0 || staffMembers.length === 0 || services.length === 0) && (
+      {/* Readiness error — 403 shown as error, not swallowed as canBook=false */}
+      {readinessError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {readinessError}
+        </Alert>
+      )}
+
+      {/* Prerequisite Alert if salon has no active clients/staff/services */}
+      {!readinessError && !readiness.canBook && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           To book appointments, your salon must have active <strong>Clients</strong>, <strong>Staff members</strong>, and <strong>Services</strong> in the system.
+          {readiness.clientsCount === 0 && <span> &mdash; No active clients.</span>}
+          {readiness.staffCount === 0 && <span> &mdash; No active staff.</span>}
+          {readiness.servicesCount === 0 && <span> &mdash; No active services.</span>}
         </Alert>
       )}
 

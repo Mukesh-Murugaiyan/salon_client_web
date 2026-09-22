@@ -135,7 +135,7 @@ UI Navigation & Page Access
 ## 4. Initial Seed Credentials
 
 To log in immediately after clean database seeding:
-- **Email**: `admin@example.com`
+- **Email**: `superadmin@salon.com`
 - **Password**: `Admin@123`
 - **Assigned Role**: `Super Admin` (Company: `Demo Company`)
 - **Granted Permissions**: Full platform permissions (`users:*`, `roles:*`, `appointments:*`, `clients:*`, `dashboard:*`, etc.)

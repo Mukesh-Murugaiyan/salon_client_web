@@ -170,7 +170,7 @@ const App = () => {
         <Route
           path={ROUTES.ADMIN_SALONS.value}
           element={
-            <PermissionRoute requiredPermission="companies:view">
+            <PermissionRoute requiredPermission="salons:view">
               <Salons />
             </PermissionRoute>
           }
