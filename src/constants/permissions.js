@@ -11,6 +11,7 @@ export const MODULES = {
   DASHBOARD: 'dashboard',
   COMPANIES: 'companies',
   PLANS: 'plans',
+  SERVICES: 'services',
 };
 
 export const ACTIONS = {
@@ -25,6 +26,12 @@ export const PERMISSION_CATALOG = [
     module: MODULES.STAFF,
     label: 'Staff',
     description: 'Manage stylists, service specialists, and salon employees',
+    actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
+  },
+  {
+    module: MODULES.SERVICES,
+    label: 'Services',
+    description: 'Salon service catalog, durations, and pricing',
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
   },
   {

@@ -13,6 +13,7 @@ import RoleDetail from './pages/Roles/RoleDetail';
 import Appointments from './pages/Appointments';
 import Clients from './pages/Clients';
 import StaffList from './pages/Staff/StaffList';
+import ServicesList from './pages/Services/ServicesList';
 import Plans from './pages/Plans';
 import Salons from './pages/Salons';
 import Subscriptions from './pages/Subscriptions';
@@ -112,6 +113,16 @@ const App = () => {
           element={
             <PermissionRoute requiredPermission="staff:view">
               <StaffList />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Services Management */}
+        <Route
+          path={ROUTES.SERVICES.value}
+          element={
+            <PermissionRoute requiredPermission="services:view">
+              <ServicesList />
             </PermissionRoute>
           }
         />

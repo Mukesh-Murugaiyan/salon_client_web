@@ -33,6 +33,7 @@ const DRAWER_WIDTH = 260;
 const ICON_MAP = {
   Dashboard: <DashboardIcon />,
   Badge: <BadgeIcon />,
+  Spa: <SpaIcon />,
   ManageAccounts: <ManageAccountsIcon />,
   Security: <SecurityIcon />,
   CalendarMonth: <CalendarMonthIcon />,

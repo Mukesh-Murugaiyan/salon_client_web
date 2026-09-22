@@ -14,6 +14,10 @@ export const ROUTES = {
     label: 'Staff',
     value: '/staff',
   },
+  SERVICES: {
+    label: 'Services',
+    value: '/services',
+  },
   CLIENTS: {
     label: 'Clients',
     value: '/clients',

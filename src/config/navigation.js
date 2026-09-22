@@ -22,6 +22,13 @@ export const NAVIGATION_ITEMS = [
     icon: 'Badge',
   },
   {
+    label: 'Services',
+    value: 'services',
+    route: ROUTES.SERVICES.value,
+    requiredPermission: 'services:view',
+    icon: 'Spa',
+  },
+  {
     label: 'Clients',
     value: 'clients',
     route: ROUTES.CLIENTS.value,

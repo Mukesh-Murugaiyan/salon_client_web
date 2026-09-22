@@ -79,6 +79,16 @@ UI Navigation & Page Access
    - Soft delete staff member.
    - Strict domain boundary: Staff service providers are independent of user login accounts.
    - Permission-governed controls (`staff:view`, `staff:create`, `staff:update`, `staff:delete`).
+7. **Service Management (`/services`) — Ticket 6**:
+   - Services directory with search (name, description) and status filter tabs (All, Active, Inactive).
+   - Dynamic summary metrics (Total Services, Active, Inactive, Average Price).
+   - Add/Edit Service dialogs with positive duration and non-negative price validation.
+   - Detailed Service profile modal with duration, price, active state, and audit dates.
+   - Duplicate active service name guard per company.
+   - One-click Activate / Deactivate status toggle.
+   - Soft delete service with confirmation prompt.
+   - Zero hardcoded services: 100% database-driven and isolated to the authenticated company.
+   - Permission-governed controls (`services:view`, `services:create`, `services:update`, `services:delete`).
 
 ---
 
