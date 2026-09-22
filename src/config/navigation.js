@@ -15,6 +15,27 @@ export const NAVIGATION_ITEMS = [
     icon: 'Dashboard',
   },
   {
+    label: 'Staff',
+    value: 'staff',
+    route: ROUTES.STAFF.value,
+    requiredPermission: 'staff:view',
+    icon: 'Badge',
+  },
+  {
+    label: 'Clients',
+    value: 'clients',
+    route: ROUTES.CLIENTS.value,
+    requiredPermission: 'clients:view',
+    icon: 'People',
+  },
+  {
+    label: 'Appointments',
+    value: 'appointments',
+    route: ROUTES.APPOINTMENTS.value,
+    requiredPermission: 'appointments:view',
+    icon: 'CalendarMonth',
+  },
+  {
     label: 'Users',
     value: 'users',
     route: ROUTES.USERS.value,
@@ -27,20 +48,6 @@ export const NAVIGATION_ITEMS = [
     route: ROUTES.ROLES.value,
     requiredPermission: 'roles:view',
     icon: 'Security',
-  },
-  {
-    label: 'Appointments',
-    value: 'appointments',
-    route: ROUTES.APPOINTMENTS.value,
-    requiredPermission: 'appointments:view',
-    icon: 'CalendarMonth',
-  },
-  {
-    label: 'Clients',
-    value: 'clients',
-    route: ROUTES.CLIENTS.value,
-    requiredPermission: 'clients:view',
-    icon: 'People',
   },
   {
     label: 'Subscription',

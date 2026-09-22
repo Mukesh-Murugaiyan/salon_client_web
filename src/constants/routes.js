@@ -10,6 +10,18 @@ export const ROUTES = {
     label: 'Dashboard',
     value: '/dashboard',
   },
+  STAFF: {
+    label: 'Staff',
+    value: '/staff',
+  },
+  CLIENTS: {
+    label: 'Clients',
+    value: '/clients',
+  },
+  APPOINTMENTS: {
+    label: 'Appointments',
+    value: '/appointments',
+  },
   USERS: {
     label: 'Users',
     value: '/users',
@@ -21,14 +33,6 @@ export const ROUTES = {
   ROLE_DETAIL: {
     label: 'Role Detail',
     value: '/roles/:id',
-  },
-  APPOINTMENTS: {
-    label: 'Appointments',
-    value: '/appointments',
-  },
-  CLIENTS: {
-    label: 'Clients',
-    value: '/clients',
   },
   SUBSCRIPTION: {
     label: 'Subscription',

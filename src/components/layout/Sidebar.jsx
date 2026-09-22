@@ -22,6 +22,7 @@ import {
   Spa as SpaIcon,
   ManageAccounts as ManageAccountsIcon,
   Security as SecurityIcon,
+  Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { usePermission } from '../../hooks/usePermission';
@@ -31,6 +32,7 @@ const DRAWER_WIDTH = 260;
 
 const ICON_MAP = {
   Dashboard: <DashboardIcon />,
+  Badge: <BadgeIcon />,
   ManageAccounts: <ManageAccountsIcon />,
   Security: <SecurityIcon />,
   CalendarMonth: <CalendarMonthIcon />,

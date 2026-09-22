@@ -66,6 +66,19 @@ UI Navigation & Page Access
 4. **Permission-Driven Operational Dashboard (`/dashboard`)**:
    - Live metrics (Today's appointments, confirmed bookings, active clients, company users).
    - Module quick links rendered dynamically based on authorized permissions.
+5. **Client Management (`/clients`) — Ticket 4**:
+   - Client directory with search (name, phone, email) and gender filtering.
+   - Add/Edit Client dialogs with form validation and duplicate phone detection.
+   - Client profile dialog with client notes and timestamps.
+   - Delete confirmation with soft-delete semantics.
+6. **Staff Management (`/staff`) — Ticket 5**:
+   - Staff directory with search (name, phone, specialization) and role/title filter tabs.
+   - Add/Edit Staff dialogs with standardized salon job titles (Senior Stylist, Colorist, Barber, etc.) and multi-select specialization tags.
+   - Detailed Staff profile modal with service specializations, contact cards, and employment status.
+   - One-click Activate / Deactivate status toggle.
+   - Soft delete staff member.
+   - Strict domain boundary: Staff service providers are independent of user login accounts.
+   - Permission-governed controls (`staff:view`, `staff:create`, `staff:update`, `staff:delete`).
 
 ---
 

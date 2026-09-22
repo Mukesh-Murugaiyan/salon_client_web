@@ -4,6 +4,7 @@
 export const MODULES = {
   USERS: 'users',
   ROLES: 'roles',
+  STAFF: 'staff',
   APPOINTMENTS: 'appointments',
   CLIENTS: 'clients',
   SUBSCRIPTION: 'subscription',
@@ -21,15 +22,15 @@ export const ACTIONS = {
 
 export const PERMISSION_CATALOG = [
   {
-    module: MODULES.USERS,
-    label: 'Users',
-    description: 'Manage staff and company users',
+    module: MODULES.STAFF,
+    label: 'Staff',
+    description: 'Manage stylists, service specialists, and salon employees',
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
   },
   {
-    module: MODULES.ROLES,
-    label: 'Roles & Permissions',
-    description: 'Manage security roles and permission assignments',
+    module: MODULES.CLIENTS,
+    label: 'Clients',
+    description: 'Client records, profiles, and history',
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
   },
   {
@@ -39,9 +40,15 @@ export const PERMISSION_CATALOG = [
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
   },
   {
-    module: MODULES.CLIENTS,
-    label: 'Clients',
-    description: 'Client records, profiles, and history',
+    module: MODULES.USERS,
+    label: 'Users',
+    description: 'Manage system login accounts and company users',
+    actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
+  },
+  {
+    module: MODULES.ROLES,
+    label: 'Roles & Permissions',
+    description: 'Manage security roles and permission assignments',
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
   },
   {
