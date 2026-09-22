@@ -114,6 +114,21 @@ UI Navigation & Page Access
    - Subscription Audit History table displaying plan tier, price, coverage dates, action (`ASSIGN`, `RENEW`, `UPGRADE`), and timestamp.
    - Strict expiration gating: When a subscription expires, gated operational actions (registering staff, booking appointments) are blocked with exact server error feedback.
    - Permission-governed controls (`subscription:view`, `subscription:assign`, `subscription:renew`, `subscription:upgrade`, `subscription:history`).
+11. **Attendance & Geo-Fencing Check-In (`/attendance`) — Ticket 9**:
+   - Live digital clock and today's check-in status card.
+   - Device GPS geolocation integration (`navigator.geolocation.getCurrentPosition`).
+   - Proximity validation: Server Haversine formula verifies device coordinates against configured salon coordinates.
+   - Instant status feedback:
+     - Valid check-in: Success message with timestamp, distance from salon, and Present badge.
+     - Out-of-range: Clear error notification (`OUT_OF_RANGE` 403) explaining proximity vs allowed radius.
+     - Duplicate prevention: Displays already checked-in state and timestamp, preventing multiple check-ins on the same day.
+   - Salon Geo-Fence Configuration Dialog (Admins/Managers):
+     - View and configure salon latitude, longitude, and allowed radius in meters.
+     - One-click "Use My Current Device Location" button for salon calibration.
+   - Company Attendance History Logs (Users with `attendance:view`):
+     - Search by employee name/email and filter by date.
+     - Displays employee profile, date, check-in time, distance from salon, coordinates, and status.
+   - Permission-governed controls (`attendance:check_in`, `attendance:view`, `companies:update`).
 
 ---
 

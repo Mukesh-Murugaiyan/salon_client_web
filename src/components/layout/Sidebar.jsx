@@ -23,6 +23,7 @@ import {
   ManageAccounts as ManageAccountsIcon,
   Security as SecurityIcon,
   Badge as BadgeIcon,
+  HowToReg as HowToRegIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { usePermission } from '../../hooks/usePermission';
@@ -37,6 +38,7 @@ const ICON_MAP = {
   ManageAccounts: <ManageAccountsIcon />,
   Security: <SecurityIcon />,
   CalendarMonth: <CalendarMonthIcon />,
+  HowToReg: <HowToRegIcon />,
   People: <PeopleIcon />,
   CreditCard: <CreditCardIcon />,
   Layers: <LayersIcon />,
@@ -57,10 +59,14 @@ const Sidebar = ({ mobileOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Pure filtering based on dynamic permission check
-  const visibleItems = NAVIGATION_ITEMS.filter((item) =>
-    !item.requiredPermission || hasPermission(item.requiredPermission)
-  );
+  // Pure filtering based on dynamic permission check (handles single string or array of acceptable permissions)
+  const visibleItems = NAVIGATION_ITEMS.filter((item) => {
+    if (!item.requiredPermission) return true;
+    if (Array.isArray(item.requiredPermission)) {
+      return item.requiredPermission.some((perm) => hasPermission(perm));
+    }
+    return hasPermission(item.requiredPermission);
+  });
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

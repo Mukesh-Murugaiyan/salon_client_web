@@ -145,7 +145,11 @@ const RoleDetail = () => {
     );
   }
 
-  const standardActions = ['view', 'create', 'update', 'delete'];
+  const allActions = Array.from(
+    new Set(
+      ['view', 'create', 'update', 'delete', ...catalog.flatMap((item) => item.actions || [])]
+    )
+  );
 
   return (
     <PageContainer
@@ -321,9 +325,9 @@ const RoleDetail = () => {
               <TableHead sx={{ backgroundColor: '#ffffff' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700, color: '#475569', minWidth: 200 }}>Module / Resource</TableCell>
-                  {standardActions.map((action) => (
-                    <TableCell key={action} align="center" sx={{ fontWeight: 700, color: '#475569', textTransform: 'capitalize', width: 120 }}>
-                      {action}
+                  {allActions.map((action) => (
+                    <TableCell key={action} align="center" sx={{ fontWeight: 700, color: '#475569', textTransform: 'capitalize', minWidth: 100 }}>
+                      {action.replace('_', ' ')}
                     </TableCell>
                   ))}
                   <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', width: 130 }}>
@@ -348,7 +352,7 @@ const RoleDetail = () => {
                         </Typography>
                       </TableCell>
 
-                      {standardActions.map((action) => {
+                      {allActions.map((action) => {
                         const permString = `${moduleItem.module}:${action}`;
                         const isActionAvailable = moduleItem.actions.includes(action);
 

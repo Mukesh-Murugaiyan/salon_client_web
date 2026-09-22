@@ -12,6 +12,7 @@ export const MODULES = {
   COMPANIES: 'companies',
   PLANS: 'plans',
   SERVICES: 'services',
+  ATTENDANCE: 'attendance',
 };
 
 export const ACTIONS = {
@@ -23,6 +24,7 @@ export const ACTIONS = {
   RENEW: 'renew',
   UPGRADE: 'upgrade',
   HISTORY: 'history',
+  CHECK_IN: 'check_in',
 };
 
 export const PERMISSION_CATALOG = [
@@ -85,5 +87,11 @@ export const PERMISSION_CATALOG = [
     label: 'Plans',
     description: 'Subscription plans, pricing, and quota limits',
     actions: [ACTIONS.VIEW, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE],
+  },
+  {
+    module: MODULES.ATTENDANCE,
+    label: 'Attendance',
+    description: 'Employee check-in and attendance tracking with geo-fencing',
+    actions: [ACTIONS.VIEW, ACTIONS.CHECK_IN],
   },
 ];
