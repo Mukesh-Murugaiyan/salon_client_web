@@ -58,6 +58,8 @@ const Salons = () => {
     phone: '',
     address: '',
     allowedRadiusInMeters: 100,
+    openingTime: '09:00',
+    closingTime: '20:00',
     isActive: true,
   });
   const [dialogError, setDialogError] = useState('');
@@ -113,6 +115,8 @@ const Salons = () => {
       latitude: '',
       longitude: '',
       allowedRadiusInMeters: 100,
+      openingTime: '09:00',
+      closingTime: '20:00',
       isActive: true,
     });
     setDialogError('');
@@ -130,6 +134,8 @@ const Salons = () => {
       latitude: salon.latitude != null ? salon.latitude : '',
       longitude: salon.longitude != null ? salon.longitude : '',
       allowedRadiusInMeters: salon.allowedRadiusInMeters || 100,
+      openingTime: salon.openingTime || '09:00',
+      closingTime: salon.closingTime || '20:00',
       isActive: salon.isActive,
     });
     setDialogError('');
@@ -157,6 +163,8 @@ const Salons = () => {
         latitude: formData.latitude ? formData.latitude : null,
         longitude: formData.longitude ? formData.longitude : null,
         allowedRadiusInMeters: Number(formData.allowedRadiusInMeters),
+        openingTime: formData.openingTime,
+        closingTime: formData.closingTime,
         isActive: formData.isActive,
       };
 
@@ -510,6 +518,31 @@ const Salons = () => {
               helperText="Allowed check-in radius for staff attendance"
               inputProps={{ min: 10 }}
             />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <TextField
+                label="Opening Time"
+                type="time"
+                required
+                fullWidth
+                value={formData.openingTime}
+                onChange={(e) => setFormData({ ...formData, openingTime: e.target.value })}
+                helperText="Salon opens at this time"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ step: 300 }}
+              />
+              <TextField
+                label="Closing Time"
+                type="time"
+                required
+                fullWidth
+                value={formData.closingTime}
+                onChange={(e) => setFormData({ ...formData, closingTime: e.target.value })}
+                helperText="Salon closes at this time"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ step: 300 }}
+              />
+            </Box>
 
             <FormControlLabel
               control={
