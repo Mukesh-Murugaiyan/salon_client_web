@@ -172,7 +172,7 @@ const Subscriptions = () => {
 
   const handleRemovePlan = async () => {
     if (!window.confirm('Are you sure you want to completely remove this subscription plan? This will immediately revoke access and expire the status.')) return;
-    
+
     setIsLoading(true);
     try {
       await subscriptionApi.removePlan(selectedContextSalonId);
@@ -206,9 +206,9 @@ const Subscriptions = () => {
   const appUsagePercent =
     subscription?.usage?.maxAppointments > 0
       ? Math.min(
-          100,
-          Math.round((subscription.usage.appointmentsCount / subscription.usage.maxAppointments) * 100)
-        )
+        100,
+        Math.round((subscription.usage.appointmentsCount / subscription.usage.maxAppointments) * 100)
+      )
       : 0;
 
   return (
@@ -291,365 +291,365 @@ const Subscriptions = () => {
             </Alert>
           )}
 
-      {/* Expired Subscription Warning Banner */}
-      {isExpired && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3, borderRadius: 2 }}
-          action={
-            (can('subscription', 'renew') || can('subscription', 'upgrade')) && (
-              <Button
-                color="inherit"
-                size="small"
-                variant="outlined"
-                onClick={subscription?.plan ? () => setRenewDialogOpen(true) : handleOpenPlanModal}
-                sx={{ textTransform: 'none', fontWeight: 700 }}
-              >
-                {subscription?.plan ? 'Renew Now' : 'Select Plan'}
-              </Button>
-            )
-          }
-        >
-          <strong>Your subscription is currently EXPIRED.</strong> Gated actions such as registering new staff or booking appointments are blocked until your plan is renewed.
-        </Alert>
-      )}
-
-      {/* Main Subscription Overview Card */}
-      <Card sx={{ p: 3, mb: 3, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 2,
-            mb: 3,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 2,
-                bgcolor: isExpired ? 'error.light' : 'primary.light',
-                color: isExpired ? 'error.main' : 'primary.main',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+          {/* Expired Subscription Warning Banner */}
+          {isExpired && (
+            <Alert
+              severity="error"
+              sx={{ mb: 3, borderRadius: 2 }}
+              action={
+                (can('subscription', 'renew') || can('subscription', 'upgrade')) && (
+                  <Button
+                    color="inherit"
+                    size="small"
+                    variant="outlined"
+                    onClick={subscription?.plan ? () => setRenewDialogOpen(true) : handleOpenPlanModal}
+                    sx={{ textTransform: 'none', fontWeight: 700 }}
+                  >
+                    {subscription?.plan ? 'Renew Now' : 'Select Plan'}
+                  </Button>
+                )
+              }
             >
-              <CreditCardIcon fontSize="medium" />
-            </Box>
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Typography variant="h5" fontWeight={700}>
-                  {subscription?.plan?.name || 'No Active Plan Assigned'}
-                </Typography>
-                <Chip
-                  label={subscription?.status || 'EXPIRED'}
-                  color={isExpired ? 'error' : 'success'}
-                  sx={{ fontWeight: 700, fontSize: '0.8rem' }}
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                Salon: <strong>{subscription?.salonName}</strong>
-              </Typography>
-            </Box>
-          </Box>
-
-          {subscription?.plan && (
-            <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-              <Typography variant="h5" fontWeight={800} color="primary.main">
-                ${Number(subscription.plan.price).toFixed(2)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                per {subscription.plan.durationInDays} days billing cycle
-              </Typography>
-            </Box>
-          )}
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Schedule & Duration Info */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Cycle Start Date
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {subscription?.startDate
-                ? new Date(subscription.startDate).toLocaleDateString()
-                : 'Not Started'}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Cycle End Date
-            </Typography>
-            <Typography variant="body1" fontWeight={600}>
-              {subscription?.endDate
-                ? new Date(subscription.endDate).toLocaleDateString()
-                : 'Not Set'}
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              Remaining Duration
-            </Typography>
-            <Typography
-              variant="body1"
-              fontWeight={700}
-              color={isExpired ? 'error.main' : 'success.main'}
-            >
-              {isExpired ? '0 days (Expired)' : `${subscription?.daysRemaining || 0} days left`}
-            </Typography>
-          </Box>
-        </Box>
-      </Card>
-
-      {/* Live Quota Usage Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
-        {/* Staff Quota */}
-        <Card sx={{ p: 3, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-            <PeopleIcon color="primary" />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Staff Member Quota
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Active stylists and service specialists
-              </Typography>
-            </Box>
-            <Typography variant="h6" fontWeight={700}>
-              {subscription?.usage?.staffCount || 0} / {subscription?.usage?.maxStaff || 0}
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={staffUsagePercent}
-            color={staffUsagePercent >= 100 ? 'error' : staffUsagePercent >= 80 ? 'warning' : 'primary'}
-            sx={{ height: 8, borderRadius: 4, mb: 1 }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            {staffUsagePercent}% of plan limit utilized
-          </Typography>
-        </Card>
-
-        {/* Appointments Quota */}
-        <Card sx={{ p: 3, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-            <EventNoteIcon color="secondary" />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Appointments Quota
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Bookings scheduled in current billing cycle
-              </Typography>
-            </Box>
-            <Typography variant="h6" fontWeight={700}>
-              {subscription?.usage?.appointmentsCount || 0} / {subscription?.usage?.maxAppointments || 0}
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={appUsagePercent}
-            color={appUsagePercent >= 100 ? 'error' : appUsagePercent >= 80 ? 'warning' : 'secondary'}
-            sx={{ height: 8, borderRadius: 4, mb: 1 }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            {appUsagePercent}% of cycle bookings utilized
-          </Typography>
-        </Card>
-      </Box>
-
-      {/* Subscription History Tab Container */}
-      <Card sx={{ borderRadius: 2, overflow: 'hidden' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
-          <Tabs value={currentTab} onChange={(e, val) => setCurrentTab(val)}>
-            <Tab
-              icon={<HistoryIcon fontSize="small" />}
-              iconPosition="start"
-              label={`Subscription Audit History (${history.length})`}
-              sx={{ textTransform: 'none', fontWeight: 600 }}
-            />
-          </Tabs>
-        </Box>
-
-        {history.length === 0 ? (
-          <EmptyState
-            title="No Subscription History"
-            description="No subscription assignments or renewals have occurred yet for this salon."
-          />
-        ) : (
-          <TableContainer>
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead sx={{ bgcolor: 'grey.50' }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Plan Tier</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Price</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Date Coverage</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Audit Date</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {history.map((h) => (
-                  <TableRow key={h.id} hover>
-                    <TableCell>
-                      <Chip
-                        label={h.action}
-                        size="small"
-                        color={
-                          h.action === 'UPGRADE'
-                            ? 'primary'
-                            : h.action === 'RENEW'
-                            ? 'success'
-                            : 'default'
-                        }
-                        sx={{ fontWeight: 700, fontSize: '0.75rem' }}
-                      />
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
-                        {h.plan?.name || 'Standard Tier'}
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={700} color="primary.main">
-                        ${Number(h.price).toFixed(2)}
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(h.startDate).toLocaleDateString()} – {new Date(h.endDate).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(h.createdAt).toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Card>
-
-      {/* Modal: Assign / Upgrade Plan */}
-      <Dialog open={planDialogOpen} onClose={() => !isUpgrading && setPlanDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          {subscription?.plan ? 'Upgrade / Switch Subscription Plan' : 'Assign Salon Subscription Plan'}
-        </DialogTitle>
-        <DialogContent dividers>
-          {planDialogError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {planDialogError}
+              <strong>Your subscription is currently EXPIRED.</strong> Gated actions such as registering new staff or booking appointments are blocked until your plan is renewed.
             </Alert>
           )}
 
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Select a plan tier below. Your salon limits and billing cycle duration will immediately update upon confirmation:
-          </Typography>
+          {/* Main Subscription Overview Card */}
+          <Card sx={{ p: 3, mb: 3, borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'space-between',
+                alignItems: { xs: 'flex-start', md: 'center' },
+                gap: 2,
+                mb: 3,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: isExpired ? 'error.light' : 'primary.light',
+                    color: isExpired ? 'error.main' : 'primary.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CreditCardIcon fontSize="medium" />
+                </Box>
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Typography variant="h5" fontWeight={700}>
+                      {subscription?.plan?.name || 'No Active Plan Assigned'}
+                    </Typography>
+                    <Chip
+                      label={subscription?.status || 'EXPIRED'}
+                      color={isExpired ? 'error' : 'success'}
+                      sx={{ fontWeight: 700, fontSize: '0.8rem' }}
+                    />
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Salon: <strong>{subscription?.salonName}</strong>
+                  </Typography>
+                </Box>
+              </Box>
 
-          <RadioGroup
-            value={selectedPlanId}
-            onChange={(e) => setSelectedPlanId(e.target.value)}
-          >
-            {availablePlans.map((p) => (
-              <Card
-                key={p.id}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  mb: 1.5,
-                  borderRadius: 2,
-                  borderColor: selectedPlanId === p.id ? 'primary.main' : 'divider',
-                  bgcolor: selectedPlanId === p.id ? 'primary.light' : 'background.paper',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setSelectedPlanId(p.id)}
-              >
-                <FormControlLabel
-                  value={p.id}
-                  control={<Radio color="primary" />}
-                  label={
-                    <Box sx={{ ml: 1, width: '100%' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="subtitle1" fontWeight={700}>
-                          {p.name}
-                        </Typography>
-                        <Typography variant="subtitle1" fontWeight={800} color="primary.main">
-                          ${Number(p.price).toFixed(2)}
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {p.durationInDays} Days • Up to {p.maxStaff} Staff • Up to {p.maxAppointments} Appointments
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ width: '100%', m: 0 }}
+              {subscription?.plan && (
+                <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                  <Typography variant="h5" fontWeight={800} color="primary.main">
+                    ${Number(subscription.plan.price).toFixed(2)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    per {subscription.plan.durationInDays} days billing cycle
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+
+            {/* Schedule & Duration Info */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Cycle Start Date
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {subscription?.startDate
+                    ? new Date(subscription.startDate).toLocaleDateString()
+                    : 'Not Started'}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Cycle End Date
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {subscription?.endDate
+                    ? new Date(subscription.endDate).toLocaleDateString()
+                    : 'Not Set'}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Remaining Duration
+                </Typography>
+                <Typography
+                  variant="body1"
+                  fontWeight={700}
+                  color={isExpired ? 'error.main' : 'success.main'}
+                >
+                  {isExpired ? '0 days (Expired)' : `${subscription?.daysRemaining || 0} days left`}
+                </Typography>
+              </Box>
+            </Box>
+          </Card>
+
+          {/* Live Quota Usage Cards */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
+            {/* Staff Quota */}
+            <Card sx={{ p: 3, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <PeopleIcon color="primary" />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Staff Member Quota
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Active stylists and service specialists
+                  </Typography>
+                </Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {subscription?.usage?.staffCount || 0} / {subscription?.usage?.maxStaff || 0}
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={staffUsagePercent}
+                color={staffUsagePercent >= 100 ? 'error' : staffUsagePercent >= 80 ? 'warning' : 'primary'}
+                sx={{ height: 8, borderRadius: 4, mb: 1 }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {staffUsagePercent}% of plan limit utilized
+              </Typography>
+            </Card>
+
+            {/* Appointments Quota */}
+            <Card sx={{ p: 3, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <EventNoteIcon color="secondary" />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Appointments Quota
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Bookings scheduled in current billing cycle
+                  </Typography>
+                </Box>
+                <Typography variant="h6" fontWeight={700}>
+                  {subscription?.usage?.appointmentsCount || 0} / {subscription?.usage?.maxAppointments || 0}
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={appUsagePercent}
+                color={appUsagePercent >= 100 ? 'error' : appUsagePercent >= 80 ? 'warning' : 'secondary'}
+                sx={{ height: 8, borderRadius: 4, mb: 1 }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {appUsagePercent}% of cycle bookings utilized
+              </Typography>
+            </Card>
+          </Box>
+
+          {/* Subscription History Tab Container */}
+          {can('subscription', 'history') && <Card sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+              <Tabs value={currentTab} onChange={(e, val) => setCurrentTab(val)}>
+                <Tab
+                  icon={<HistoryIcon fontSize="small" />}
+                  iconPosition="start"
+                  label={`Subscription Audit History (${history.length})`}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
                 />
-              </Card>
-            ))}
-          </RadioGroup>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={() => setPlanDialogOpen(false)} disabled={isUpgrading} sx={{ textTransform: 'none' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmPlanChange}
-            disabled={isUpgrading || !selectedPlanId}
-            startIcon={isUpgrading && <CircularProgress size={18} color="inherit" />}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {isUpgrading ? 'Updating...' : subscription?.plan ? 'Confirm Upgrade' : 'Assign Plan'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+              </Tabs>
+            </Box>
 
-      {/* Modal: Renew Confirmation */}
-      <Dialog open={renewDialogOpen} onClose={() => !isRenewing && setRenewDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          Renew Subscription?
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
-            Renewing will extend your current <strong>{subscription?.plan?.name}</strong> plan for another{' '}
-            <strong>{subscription?.plan?.durationInDays} days</strong> at{' '}
-            <strong>${Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={() => setRenewDialogOpen(false)} disabled={isRenewing} sx={{ textTransform: 'none' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmRenew}
-            disabled={isRenewing}
-            startIcon={isRenewing && <CircularProgress size={18} color="inherit" />}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {isRenewing ? 'Renewing...' : 'Confirm Renewal'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            {history.length === 0 ? (
+              <EmptyState
+                title="No Subscription History"
+                description="No subscription assignments or renewals have occurred yet for this salon."
+              />
+            ) : (
+              <TableContainer>
+                <Table sx={{ minWidth: 650 }}>
+                  <TableHead sx={{ bgcolor: 'grey.50' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Plan Tier</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Price</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Date Coverage</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Audit Date</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {history.map((h) => (
+                      <TableRow key={h.id} hover>
+                        <TableCell>
+                          <Chip
+                            label={h.action}
+                            size="small"
+                            color={
+                              h.action === 'UPGRADE'
+                                ? 'primary'
+                                : h.action === 'RENEW'
+                                  ? 'success'
+                                  : 'default'
+                            }
+                            sx={{ fontWeight: 700, fontSize: '0.75rem' }}
+                          />
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={600}>
+                            {h.plan?.name || 'Standard Tier'}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2" fontWeight={700} color="primary.main">
+                            ${Number(h.price).toFixed(2)}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {new Date(h.startDate).toLocaleDateString()} – {new Date(h.endDate).toLocaleDateString()}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {new Date(h.createdAt).toLocaleString()}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Card>}
+
+          {/* Modal: Assign / Upgrade Plan */}
+          <Dialog open={planDialogOpen} onClose={() => !isUpgrading && setPlanDialogOpen(false)} maxWidth="sm" fullWidth>
+            <DialogTitle sx={{ fontWeight: 700 }}>
+              {subscription?.plan ? 'Upgrade / Switch Subscription Plan' : 'Assign Salon Subscription Plan'}
+            </DialogTitle>
+            <DialogContent dividers>
+              {planDialogError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {planDialogError}
+                </Alert>
+              )}
+
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Select a plan tier below. Your salon limits and billing cycle duration will immediately update upon confirmation:
+              </Typography>
+
+              <RadioGroup
+                value={selectedPlanId}
+                onChange={(e) => setSelectedPlanId(e.target.value)}
+              >
+                {availablePlans.map((p) => (
+                  <Card
+                    key={p.id}
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      mb: 1.5,
+                      borderRadius: 2,
+                      borderColor: selectedPlanId === p.id ? 'primary.main' : 'divider',
+                      bgcolor: selectedPlanId === p.id ? 'primary.light' : 'background.paper',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => setSelectedPlanId(p.id)}
+                  >
+                    <FormControlLabel
+                      value={p.id}
+                      control={<Radio color="primary" />}
+                      label={
+                        <Box sx={{ ml: 1, width: '100%' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" fontWeight={700}>
+                              {p.name}
+                            </Typography>
+                            <Typography variant="subtitle1" fontWeight={800} color="primary.main">
+                              ${Number(p.price).toFixed(2)}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">
+                            {p.durationInDays} Days • Up to {p.maxStaff} Staff • Up to {p.maxAppointments} Appointments
+                          </Typography>
+                        </Box>
+                      }
+                      sx={{ width: '100%', m: 0 }}
+                    />
+                  </Card>
+                ))}
+              </RadioGroup>
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <Button onClick={() => setPlanDialogOpen(false)} disabled={isUpgrading} sx={{ textTransform: 'none' }}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleConfirmPlanChange}
+                disabled={isUpgrading || !selectedPlanId}
+                startIcon={isUpgrading && <CircularProgress size={18} color="inherit" />}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                {isUpgrading ? 'Updating...' : subscription?.plan ? 'Confirm Upgrade' : 'Assign Plan'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Modal: Renew Confirmation */}
+          <Dialog open={renewDialogOpen} onClose={() => !isRenewing && setRenewDialogOpen(false)} maxWidth="xs" fullWidth>
+            <DialogTitle sx={{ fontWeight: 700 }}>
+              Renew Subscription?
+            </DialogTitle>
+            <DialogContent>
+              <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
+                Renewing will extend your current <strong>{subscription?.plan?.name}</strong> plan for another{' '}
+                <strong>{subscription?.plan?.durationInDays} days</strong> at{' '}
+                <strong>${Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
+              </Typography>
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <Button onClick={() => setRenewDialogOpen(false)} disabled={isRenewing} sx={{ textTransform: 'none' }}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleConfirmRenew}
+                disabled={isRenewing}
+                startIcon={isRenewing && <CircularProgress size={18} color="inherit" />}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                {isRenewing ? 'Renewing...' : 'Confirm Renewal'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </PageContainer>
