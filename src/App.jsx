@@ -1,24 +1,31 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
-import RoleRoute from './routes/RoleRoute';
+import PermissionRoute from './routes/PermissionRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AdminPanel from './pages/AdminPanel';
+import Dashboard from './pages/Dashboard/Dashboard';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import Forbidden from './pages/Forbidden/Forbidden';
+import UserList from './pages/Users/UserList';
+import RoleList from './pages/Roles/RoleList';
+import RoleDetail from './pages/Roles/RoleDetail';
 import Appointments from './pages/Appointments';
 import Clients from './pages/Clients';
 import Plans from './pages/Plans';
 import Salons from './pages/Salons';
 import Subscriptions from './pages/Subscriptions';
-import Unauthorized from './pages/Unauthorized';
-import { ROLES } from './routes/navigation';
+import { ROUTES } from './constants/routes';
 
+/**
+ * Main Application Routing Tree
+ * Strictly enforces dynamic database permissions rather than hardcoded roles.
+ */
 const App = () => {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
+      {/* Public Route */}
+      <Route path={ROUTES.LOGIN.value} element={<Login />} />
 
       {/* Protected App Routes enclosed in DashboardLayout */}
       <Route
@@ -28,76 +35,123 @@ const App = () => {
           </ProtectedRoute>
         }
       >
-        {/* Default landing dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* Super Admin Platform Console */}
+        {/* Dynamic Operational Dashboard */}
         <Route
-          path="/admin"
+          path={ROUTES.DASHBOARD.value}
           element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
-              <AdminPanel />
-            </RoleRoute>
+            <PermissionRoute requiredPermission="dashboard:view">
+              <Dashboard />
+            </PermissionRoute>
           }
         />
 
-        {/* Appointments (Owner & Receptionist & SuperAdmin) */}
+        {/* User Management */}
         <Route
-          path="/appointments"
+          path={ROUTES.USERS.value}
           element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.OWNER, ROLES.RECEPTIONIST]}>
+            <PermissionRoute requiredPermission="users:view">
+              <UserList />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Role Management */}
+        <Route
+          path={ROUTES.ROLES.value}
+          element={
+            <PermissionRoute requiredPermission="roles:view">
+              <RoleList />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Role Detail & Permission Matrix */}
+        <Route
+          path={ROUTES.ROLE_DETAIL.value}
+          element={
+            <PermissionRoute requiredPermission="roles:view">
+              <RoleDetail />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Platform Overview */}
+        <Route
+          path={ROUTES.ADMIN.value}
+          element={
+            <PermissionRoute requiredPermission="dashboard:view">
+              <AdminDashboard />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Appointments */}
+        <Route
+          path={ROUTES.APPOINTMENTS.value}
+          element={
+            <PermissionRoute requiredPermission="appointments:view">
               <Appointments />
-            </RoleRoute>
+            </PermissionRoute>
           }
         />
 
-        {/* Clients (Owner & Receptionist & SuperAdmin) */}
+        {/* Clients */}
         <Route
-          path="/clients"
+          path={ROUTES.CLIENTS.value}
           element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.OWNER, ROLES.RECEPTIONIST]}>
+            <PermissionRoute requiredPermission="clients:view">
               <Clients />
-            </RoleRoute>
+            </PermissionRoute>
           }
         />
 
-        {/* Plans (SUPER_ADMIN only) */}
+        {/* Subscriptions */}
         <Route
-          path="/plans"
+          path={ROUTES.SUBSCRIPTION.value}
           element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
-              <Plans />
-            </RoleRoute>
-          }
-        />
-
-        {/* Salons (SUPER_ADMIN only) */}
-        <Route
-          path="/salons"
-          element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN]}>
-              <Salons />
-            </RoleRoute>
-          }
-        />
-
-        {/* Subscriptions (SUPER_ADMIN & OWNER; RECEPTIONIST is forbidden) */}
-        <Route
-          path="/subscriptions"
-          element={
-            <RoleRoute allowedRoles={[ROLES.SUPER_ADMIN, ROLES.OWNER]}>
+            <PermissionRoute requiredPermission="subscription:view">
               <Subscriptions />
-            </RoleRoute>
+            </PermissionRoute>
+          }
+        />
+
+        {/* Plans Management */}
+        <Route
+          path={ROUTES.ADMIN_PLANS.value}
+          element={
+            <PermissionRoute requiredPermission="plans:view">
+              <Plans />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Companies / Salons Management */}
+        <Route
+          path={ROUTES.ADMIN_SALONS.value}
+          element={
+            <PermissionRoute requiredPermission="companies:view">
+              <Salons />
+            </PermissionRoute>
+          }
+        />
+
+        {/* Subscription History */}
+        <Route
+          path={ROUTES.ADMIN_SUBSCRIPTION_HISTORY.value}
+          element={
+            <PermissionRoute requiredPermission="subscription:view">
+              <Subscriptions />
+            </PermissionRoute>
           }
         />
 
         {/* 403 Forbidden Access Page */}
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path={ROUTES.FORBIDDEN.value} element={<Forbidden />} />
       </Route>
 
       {/* Root redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to={ROUTES.LOGIN.value} replace />} />
+      <Route path="*" element={<Navigate to={ROUTES.LOGIN.value} replace />} />
     </Routes>
   );
 };

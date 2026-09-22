@@ -22,13 +22,7 @@ import {
   Spa as SpaIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import { getDefaultDashboardRoute } from '../routes/navigation';
-
-const DEMO_ACCOUNTS = [
-  { role: 'SUPER_ADMIN', email: 'admin@saloncrm.com', pass: 'Admin@123', label: 'Super Admin' },
-  { role: 'OWNER', email: 'owner@saloncrm.com', pass: 'Owner@123', label: 'Owner' },
-  { role: 'RECEPTIONIST', email: 'receptionist@saloncrm.com', pass: 'Receptionist@123', label: 'Receptionist' },
-];
+import { ROUTES } from '../constants/routes';
 
 const Login = () => {
   const { login, isAuthenticated, user } = useAuth();
@@ -42,9 +36,9 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // If already authenticated, redirect to role-specific dashboard
+  // If already authenticated, redirect to dashboard or intended route
   if (isAuthenticated && user) {
-    const from = location.state?.from?.pathname || getDefaultDashboardRoute(user.role);
+    const from = location.state?.from?.pathname || ROUTES.DASHBOARD.value;
     return <Navigate to={from} replace />;
   }
 
@@ -66,7 +60,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return; // Prevent duplicate requests
+    if (isSubmitting) return;
     setErrorMessage('');
 
     if (!validate()) return;
@@ -74,9 +68,8 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const loggedInUser = await login(email.trim(), password);
-      // Centralized post-login redirection based on role
-      const targetRoute = getDefaultDashboardRoute(loggedInUser.role);
+      await login(email.trim(), password);
+      const targetRoute = location.state?.from?.pathname || ROUTES.DASHBOARD.value;
       navigate(targetRoute, { replace: true });
     } catch (err) {
       const apiMessage =
@@ -92,9 +85,9 @@ const Login = () => {
     }
   };
 
-  const handleFillDemo = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
+  const handleFillSeedAdmin = () => {
+    setEmail('admin@example.com');
+    setPassword('Admin@123');
     setErrorMessage('');
     setFieldErrors({});
   };
@@ -138,6 +131,7 @@ const Login = () => {
                 background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
                 color: '#ffffff',
                 mb: 1.5,
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
               }}
             >
               <SpaIcon fontSize="medium" />
@@ -146,7 +140,7 @@ const Login = () => {
               Salon ERP Portal
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Sign in to manage appointments, clients & salons
+              Dynamic Multi-Tenant SaaS Platform
             </Typography>
           </Box>
 
@@ -225,9 +219,10 @@ const Login = () => {
                 mb: 2,
                 py: 1.3,
                 fontSize: '0.95rem',
-                backgroundColor: '#6366f1',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
                 '&:hover': {
-                  backgroundColor: '#4f46e5',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
                 },
               }}
             >
@@ -244,27 +239,25 @@ const Login = () => {
 
           <Divider sx={{ my: 2.5 }}>
             <Typography variant="caption" color="text.secondary">
-              QUICK DEMO ACCOUNTS
+              QUICK SEED ACCESS
             </Typography>
           </Divider>
 
-          {/* Helper demo account chips */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
-            {DEMO_ACCOUNTS.map((acc) => (
-              <Chip
-                key={acc.role}
-                label={acc.label}
-                variant="outlined"
-                size="small"
-                onClick={() => handleFillDemo(acc.email, acc.pass)}
-                disabled={isSubmitting}
-                sx={{
-                  cursor: 'pointer',
-                  borderColor: '#cbd5e1',
-                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#94a3b8' },
-                }}
-              />
-            ))}
+          {/* Quick seed admin fill button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Chip
+              label="Fill Seed Admin (admin@example.com)"
+              variant="outlined"
+              size="small"
+              onClick={handleFillSeedAdmin}
+              disabled={isSubmitting}
+              sx={{
+                cursor: 'pointer',
+                borderColor: '#cbd5e1',
+                fontWeight: 600,
+                '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
+              }}
+            />
           </Box>
         </CardContent>
       </Card>
