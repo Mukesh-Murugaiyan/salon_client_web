@@ -1,143 +1,161 @@
-# Salon ERP — Web Client Application
-## Ticket 3: Dynamic Company, Role, User & Permission Management
+# Salon ERP Web Portal — Production-Grade React Architecture
 
-Modern React client built with Material UI (MUI), Vite, and Axios for the multi-tenant Salon ERP SaaS platform. Under **Ticket 3**, the web client features a 100% database-driven dynamic RBAC architecture.
+A modern, responsive web application built with **React 18, Vite, and Material UI (MUI)** for the multi-tenant Salon ERP / CRM platform. The web portal features **dynamic database-driven RBAC**, **reusable enterprise UI components**, **server-side debounced search**, **resilient GPS/Wi-Fi geolocation calibration**, and **real-time subscription quota tracking**.
 
 ---
 
-## 1. Quick Start
+## 1. System Architecture & Component Design
 
+```text
+                               ┌─────────────────────────┐
+                               │   Vite Dev / Prod Host  │
+                               │   (http://localhost:5173│
+                               └────────────┬────────────┘
+                                            │
+                               ┌────────────▼────────────┐
+                               │       App.jsx Root      │
+                               └────────────┬────────────┘
+                                            │
+                ┌───────────────────────────┴───────────────────────────┐
+                ▼                                                       ▼
+  ┌───────────────────────────┐                           ┌───────────────────────────┐
+  │   AuthContext Provider    │                           │   ThemeContext Provider   │
+  │ - Token & Profile State   │                           │ - Material UI Custom Theme│
+  │ - Permissions Hydration   │                           │ - Clean Layout & Tokens   │
+  └─────────────┬─────────────┘                           └─────────────┬─────────────┘
+                │                                                       │
+                └───────────────────────────┬───────────────────────────┘
+                                            │
+                               ┌────────────▼────────────┐
+                               │      BrowserRouter      │
+                               └────────────┬────────────┘
+                                            │
+         ┌──────────────────────────────────┴──────────────────────────────────┐
+         ▼                                                                     ▼
+┌──────────────────┐                                                ┌──────────────────┐
+│   Public Route   │                                                │  Protected Route │
+│  - /login        │                                                │ - PageContainer  │
+│  - Quick Chips   │                                                │ - Dynamic Sidebar│
+└──────────────────┘                                                └────────┬─────────┘
+                                                                             │
+                      ┌──────────────────────────────────────────────────────┴──────────────────────────────────────┐
+                      ▼                                                      ▼                                      ▼
+       ┌──────────────────────────────┐                       ┌──────────────────────────────┐       ┌──────────────────────────────┐
+       │     PermissionRoute Guard    │                       │     Reusable UI Components   │       │     Domain Pages & Modals    │
+       │ - Evaluates `can(mod, act)`  │                       │ - AppModal (Sticky Header)   │       │ - Salons & Geofence Settings │
+       │ - Restricts route navigation │                       │ - DataTable (Universal)      │       │ - Users & Roles Matrix       │
+       │ - Redirects to /unauthorized │                       │ - DebouncedSearchInput       │       │ - Clients, Staff, Services   │
+       └──────────────────────────────┘                       └──────────────────────────────┘       │ - Appointments & Calendar    │
+                                                                                                     │ - Plans, Subs & Attendance   │
+                                                                                                     └──────────────────────────────┘
+```
+
+---
+
+## 2. Architectural Deep Dive: How the Web Portal Works with Backend & Mobile
+
+### 1. Dynamic Database-Driven RBAC (`usePermission`)
+The web application does **not** rely on hardcoded role strings like `admin` or `receptionist` to control UI access:
+- **Permission Hydration**: On login or page refresh, `/api/v1/auth/me` returns the user's populated permissions array (e.g. `["appointments:create", "appointments:view", "roles:update"]`).
+- **`usePermission()` Hook**: Components call `can(module, action)` to conditionally render action buttons, tabs, or table action columns:
+  ```jsx
+  const { can } = usePermission();
+  {can('appointments', 'create') && (
+    <Button variant="contained" onClick={handleOpenCreate}>Book Appointment</Button>
+  )}
+  ```
+- **Dynamic Navigation Sidebar**: The sidebar filters menu links against active user permissions. If an employee lacks `roles:view`, the "Roles & Permissions" link is completely hidden from their navigation.
+- **`PermissionRoute` Guard**: Directly protects URL navigation. Attempting to enter `/roles` directly without `roles:view` permission safely redirects the user.
+
+### 2. Interactive Role & Permission Matrix (`/roles/:id`)
+- **Granular Matrix**: Displays modules (`users`, `roles`, `clients`, `staff`, `services`, `appointments`, `plans`, `subscription`, `attendance`, `dashboard`) across actions (`view`, `create`, `update`, `delete`, `check_in`).
+- **Interactive Toggles**: Includes row-level toggles ("Select Row", "Clear Row") and global toggles ("Select All", "Clear All").
+- **Sticky Matrix Header**: The action header remains sticky during long scrolls for seamless evaluation.
+- **Live Persistence**: Saves directly to MongoDB via `PUT /api/v1/roles/:id/permissions` and immediately refreshes the role's assigned capabilities.
+
+### 3. Enterprise Reusable UI Component Architecture
+To ensure high maintainability and consistent user experience, repetitive modal, table, and search logic has been consolidated:
+- **`AppModal` (`src/components/common/AppModal.jsx`)**:
+  - Reusable wrapper for all dialogs across the app (Create Salon, Add Staff, Reschedule Appointment, Plan Assignment).
+  - Features a **sticky header**, top-right **Close (X) icon**, standardized action button bar, and clean scrolling container.
+- **`DataTable` (`src/components/common/DataTable.jsx`)**:
+  - Unified table renderer with custom column definitions, empty states, and responsive styling.
+- **`DebouncedSearchInput` (`src/components/common/DebouncedSearchInput.jsx`)**:
+  - Replaces fragmented client-side filtering with a reusable 300ms debounced input.
+  - Dispatches search values to the backend server to perform query matching at the database level.
+
+### 4. Salon Calibration & Resilient Geolocation (`Salons.jsx`)
+- **Dual-Tier Geolocation**: On desktop laptops and macOS environments where hardware GPS chips are absent, calling `getCurrentPosition` with `enableHighAccuracy: true` triggers `Position update is unavailable`.
+- **Automatic Fallback Strategy**:
+  1. First attempts browser geolocation with `{ enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }` to retrieve Wi-Fi / network position.
+  2. If the OS location service is disabled, times out, or errors, it automatically falls back to an IP geolocation service (`ipwho.is`) to instantly populate coordinates.
+  3. Displays a loading spinner inside the "Use My Current Device Location" button for immediate visual feedback.
+
+### 5. Subscription Gating & Live Quota Visuals (`/subscription`)
+- **Live Utilization Progress Bars**:
+  - Staff quota: Visualizes `staffCount / maxStaff`.
+  - Appointment quota: Visualizes `appointmentsCount / maxAppointments`.
+- **Server Gating Visuals**: When a salon subscription expires, attempts to create staff or book appointments display clear server-provided error banners without crashing.
+- **Plan Modals**: Modals for Plan Assignment, Renewal, and Tier Upgrade with immutable audit trail display.
+
+### 6. Currency Standardization
+- All prices, salon service rates, and subscription tier costs are formatted uniformly with the Indian Rupee symbol (**₹**).
+
+---
+
+## 3. Evaluator Test Credentials (Pre-Configured)
+
+> **NOTE**: Dynamic users are pre-configured in the database. Use the quick-fill chips on the Login screen to test each role instantly:
+
+| Role | Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | `superadmin@salon.com` | `Password01*` | System-wide admin, salon onboarding, subscription plans, dynamic permission matrix. |
+| **Owner** | `ownera@salon.com` | `Password01*` | Salon operations, staff management, client catalog, appointment scheduling, subscription renewals. |
+| **Receptionist** | `receptionista@salon.com` | `Password01*` | Front-desk scheduling, client records, GPS attendance check-in, today's appointments. |
+
+---
+
+## 4. Setup & Running the Web Portal
+
+### Prerequisites
+- Node.js (v18+)
+- Backend service running on port `5001` (`salon_server`)
+
+### Installation & Execution
 ```bash
 # Install dependencies
 npm install
 
-# Configure environment
-cp .env.example .env
-
-# Run development server (Vite on http://localhost:5173)
+# Start Vite development server
 npm run dev
+# Portal opens at http://localhost:5173
 
-# Production build
+# Production build & preview
 npm run build
+npm run preview
 ```
 
 ---
 
-## 2. Dynamic Permission Architecture
+## 5. Automated Test Suite (15 Tests)
 
-### Hierarchy
-```text
-Company
-   ↓
- Role
-   ↓
- User
-   ↓
-Role Permissions
-   ↓
-UI Navigation & Page Access
+Execute the automated test suite powered by Vitest and React Testing Library:
+```bash
+npm test -- --run
 ```
 
-### Core Components & Hooks:
-- **`usePermission()` Hook (`src/hooks/usePermission.js`)**:
-  Exposes `can(module, action)` and `hasPermission(permissionString)` for conditional UI rendering (action buttons, tabs, tables).
-- **`PermissionRoute` Guard (`src/routes/PermissionRoute.jsx`)**:
-  Protects frontend routes based on dynamic database permissions (e.g. `users:view`, `roles:view`, `dashboard:view`).
-- **Dynamic Sidebar Navigation (`src/components/layout/Sidebar.jsx`)**:
-  Filters navigation items dynamically against the logged-in user's assigned permissions.
-
----
-
-## 3. Key Pages & Features
-
-1. **User Management (`/users`)**:
-   - Lists company users with assigned roles, account status, and registration date.
-   - Modal to create and edit users with dynamic Role dropdown fetched from `/api/v1/roles`.
-   - Account status toggle (activate/deactivate).
-2. **Role Management (`/roles`)**:
-   - Lists company roles with description, status, and live user counts.
-   - Modal to create and edit roles.
-   - Direct navigation to interactive Permission Matrix.
-3. **Role Detail & Permission Matrix (`/roles/:id`)**:
-   - Interactive matrix table with checkboxes for each action (`view`, `create`, `update`, `delete`) across modules (`users`, `roles`, `appointments`, `clients`, `subscription`, `dashboard`, `plans`, `companies`).
-   - Module-level row toggles ("Select Row", "Clear Row") and global toggles ("Select All", "Clear All").
-   - Instant persistence to MongoDB via `PUT /api/v1/roles/:id/permissions`.
-   - Dedicated tab listing all users assigned to this role.
-4. **Permission-Driven Operational Dashboard (`/dashboard`)**:
-   - Live metrics (Today's appointments, confirmed bookings, active clients, company users).
-   - Module quick links rendered dynamically based on authorized permissions.
-5. **Client Management (`/clients`) — Ticket 4**:
-   - Client directory with search (name, phone, email) and gender filtering.
-   - Add/Edit Client dialogs with form validation and duplicate phone detection.
-   - Client profile dialog with client notes and timestamps.
-   - Delete confirmation with soft-delete semantics.
-6. **Staff Management (`/staff`) — Ticket 5**:
-   - Staff directory with search (name, phone, specialization) and role/title filter tabs.
-   - Add/Edit Staff dialogs with standardized salon job titles (Senior Stylist, Colorist, Barber, etc.) and multi-select specialization tags.
-   - Detailed Staff profile modal with service specializations, contact cards, and employment status.
-   - One-click Activate / Deactivate status toggle.
-   - Soft delete staff member.
-   - Strict domain boundary: Staff service providers are independent of user login accounts.
-   - Permission-governed controls (`staff:view`, `staff:create`, `staff:update`, `staff:delete`).
-7. **Service Management (`/services`) — Ticket 6**:
-   - Services directory with search (name, description) and status filter tabs (All, Active, Inactive).
-   - Dynamic summary metrics (Total Services, Active, Inactive, Average Price).
-   - Add/Edit Service dialogs with positive duration and non-negative price validation.
-   - Detailed Service profile modal with duration, price, active state, and audit dates.
-   - Duplicate active service name guard per company.
-   - One-click Activate / Deactivate status toggle.
-   - Soft delete service with confirmation prompt.
-   - Zero hardcoded services: 100% database-driven and isolated to the authenticated company.
-   - Permission-governed controls (`services:view`, `services:create`, `services:update`, `services:delete`).
-8. **Appointment Management (`/appointments`) — Ticket 7**:
-   - Interactive salon booking management with calendar-style table and date/staff/status filtering.
-   - Dynamic summary metrics (Total Bookings, Confirmed, Completed, Cancelled).
-   - Dynamic loading of active Clients, Staff, and Services from server APIs.
-   - Add/Edit Appointment dialogs with business hours validation (09:00–20:00) and auto-calculated end times based on selected service durations.
-   - Staff overlap conflict detection preventing duplicate active bookings on the same staff member and date.
-   - Cancelled appointments do not block staff scheduling.
-   - Status transition menu (Confirmed, Pending, Completed, Cancelled).
-   - Detailed Appointment overview modal with client, service, staff, and schedule information.
-   - Permission-governed controls (`appointments:view`, `appointments:create`, `appointments:update`, `appointments:delete`).
-9. **Plan Management (`/plans`, `/admin/plans`) — Ticket 8**:
-   - SaaS subscription tier directory with pricing, duration in days, max staff limits, and max appointment limits.
-   - Add/Edit Plan dialog with field validation and duplicate name prevention.
-   - View Plan details modal.
-   - Activate / Deactivate plan toggle.
-   - Permission-governed controls (`plans:view`, `plans:create`, `plans:update`, `plans:delete`).
-10. **Subscription Management (`/subscription`) — Ticket 8**:
-   - Real-time subscription overview: Active plan tier, price, cycle dates, and remaining days.
-   - Live Quota Usage progress bars:
-     - Staff member utilization (`staffCount / maxStaff`).
-     - Appointment bookings utilization (`appointmentsCount / maxAppointments`).
-   - Assign Plan, Renew Subscription, and Upgrade Plan modals.
-   - Subscription Audit History table displaying plan tier, price, coverage dates, action (`ASSIGN`, `RENEW`, `UPGRADE`), and timestamp.
-   - Strict expiration gating: When a subscription expires, gated operational actions (registering staff, booking appointments) are blocked with exact server error feedback.
-   - Permission-governed controls (`subscription:view`, `subscription:assign`, `subscription:renew`, `subscription:upgrade`, `subscription:history`).
-11. **Attendance & Geo-Fencing Check-In (`/attendance`) — Ticket 9**:
-   - Live digital clock and today's check-in status card.
-   - Device GPS geolocation integration (`navigator.geolocation.getCurrentPosition`).
-   - Proximity validation: Server Haversine formula verifies device coordinates against configured salon coordinates.
-   - Instant status feedback:
-     - Valid check-in: Success message with timestamp, distance from salon, and Present badge.
-     - Out-of-range: Clear error notification (`OUT_OF_RANGE` 403) explaining proximity vs allowed radius.
-     - Duplicate prevention: Displays already checked-in state and timestamp, preventing multiple check-ins on the same day.
-   - Salon Geo-Fence Configuration Dialog (Admins/Managers):
-     - View and configure salon latitude, longitude, and allowed radius in meters.
-     - One-click "Use My Current Device Location" button for salon calibration.
-   - Company Attendance History Logs (Users with `attendance:view`):
-     - Search by employee name/email and filter by date.
-     - Displays employee profile, date, check-in time, distance from salon, coordinates, and status.
-   - Permission-governed controls (`attendance:check_in`, `attendance:view`, `companies:update`).
-
----
-
-## 4. Evaluator Test Credentials
- 
-| Role | Email | Password | Access Scope |
-| :--- | :--- | :--- | :--- |
-| **Super Admin** | `superadmin@salon.com` | `Password01*` | Full system administration, salons, plans, roles & permissions |
-| **Owner** | `ownera@salon.com` | `Password01*` | Salon management, staff, clients, services, subscriptions |
-| **Receptionist** | `receptionista@salon.com` | `Password01*` | Front-desk scheduling, attendance check-in, appointments |
-
-*(Note: The login page includes quick-fill chips for all three accounts).*
+### Verified Test Suites:
+1. `src/test/Login.test.jsx` (5 tests):
+   - Renders application branding, email input, password input, and submit button.
+   - Disables submit button on empty inputs; enables upon input entry.
+   - Shows server error alert on invalid credentials (`401 INVALID_CREDENTIALS`).
+   - Shows friendly error alert on disabled accounts (`403 ACCOUNT_DISABLED`).
+2. `src/test/permissions.test.jsx` (3 tests):
+   - Grants access when exact permission is present in user array.
+   - Rejects access when permission is missing.
+   - Gracefully handles empty or unauthenticated user states.
+3. `src/test/navigation.test.jsx` (4 tests):
+   - Renders allowed navigation links based on user permissions.
+   - Hides restricted routes when permissions are absent.
+4. `src/test/storage.test.jsx` (3 tests):
+   - Validates secure storage and clearing of auth tokens and profiles.
