@@ -26,6 +26,10 @@ export const ROUTES = {
     label: 'Appointments',
     value: '/appointments',
   },
+  ATTENDANCE: {
+    label: 'Attendance',
+    value: '/attendance',
+  },
   USERS: {
     label: 'Users',
     value: '/users',

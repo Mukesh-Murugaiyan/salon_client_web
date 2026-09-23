@@ -43,6 +43,13 @@ export const NAVIGATION_ITEMS = [
     icon: 'CalendarMonth',
   },
   {
+    label: 'Attendance',
+    value: 'attendance',
+    route: ROUTES.ATTENDANCE.value,
+    requiredPermission: 'attendance:view',
+    icon: 'HowToReg',
+  },
+  {
     label: 'Users',
     value: 'users',
     route: ROUTES.USERS.value,

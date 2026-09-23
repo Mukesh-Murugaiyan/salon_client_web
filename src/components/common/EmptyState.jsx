@@ -25,6 +25,16 @@ const EmptyState = ({
 }) => {
   const displayMessage = message || description;
 
+  const renderIcon = () => {
+    if (!icon) return <InboxIcon sx={{ fontSize: 38 }} />;
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === 'function') {
+      const IconComponent = icon;
+      return <IconComponent sx={{ fontSize: 38 }} />;
+    }
+    return null;
+  };
+
   return (
     <Paper
       elevation={0}
@@ -42,7 +52,7 @@ const EmptyState = ({
       }}
     >
       <Box sx={{ color: '#94a3b8', mb: 1.25 }}>
-        {icon || <InboxIcon sx={{ fontSize: 38 }} />}
+        {renderIcon()}
       </Box>
       <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#334155', mb: 0.5, fontSize: '0.95rem' }}>
         {title}
