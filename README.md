@@ -110,8 +110,8 @@ To ensure high maintainability and consistent user experience, repetitive modal,
 | Role | Email | Password | Access Scope |
 | :--- | :--- | :--- | :--- |
 | **Super Admin** | `superadmin@salon.com` | `Password01*` | System-wide admin, salon onboarding, subscription plans, dynamic permission matrix. |
-| **Owner** | `ownera@salon.com` | `Password01*` | Salon operations, staff management, client catalog, appointment scheduling, subscription renewals. |
-| **Receptionist** | `receptionista@salon.com` | `Password01*` | Front-desk scheduling, client records, GPS attendance check-in, today's appointments. |
+| **Owner** | `owner@ecity.com` | `Password01*` | Salon operations, staff management, client catalog, appointment scheduling, subscription renewals. |
+| **Receptionist** | `receptionist@ecity.com` | `Password01*` | Front-desk scheduling, client records, GPS attendance check-in, today's appointments. |
 
 ---
 
