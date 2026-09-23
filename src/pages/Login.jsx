@@ -11,8 +11,6 @@ import {
   CircularProgress,
   InputAdornment,
   IconButton,
-  Chip,
-  Divider,
 } from '@mui/material';
 import {
   Visibility,
@@ -89,12 +87,7 @@ const Login = () => {
     }
   };
 
-  const handleFillCredentials = (testEmail, testPassword) => {
-    setEmail(testEmail);
-    setPassword(testPassword);
-    setErrorMessage('');
-    setFieldErrors({});
-  };
+
 
   const isFormValid = email.trim().length > 0 && password.length > 0;
 
@@ -238,62 +231,6 @@ const Login = () => {
                 'Sign In'
               )}
             </Button>
-          </Box>
-
-          <Divider sx={{ my: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              EVALUATOR QUICK ACCESS (PASSWORD01*)
-            </Typography>
-          </Divider>
-
-          {/* Quick test credentials buttons */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Chip
-              label="Super Admin (superadmin@salon.com)"
-              variant="outlined"
-              size="small"
-              onClick={() => handleFillCredentials('superadmin@salon.com', 'Password01*')}
-              disabled={isSubmitting}
-              sx={{
-                cursor: 'pointer',
-                borderColor: '#cbd5e1',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
-              }}
-            />
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Chip
-                label="Owner (ownera@salon.com)"
-                variant="outlined"
-                size="small"
-                onClick={() => handleFillCredentials('ownera@salon.com', 'Password01*')}
-                disabled={isSubmitting}
-                sx={{
-                  flex: 1,
-                  cursor: 'pointer',
-                  borderColor: '#cbd5e1',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
-                }}
-              />
-              <Chip
-                label="Receptionist (receptionista@salon.com)"
-                variant="outlined"
-                size="small"
-                onClick={() => handleFillCredentials('receptionista@salon.com', 'Password01*')}
-                disabled={isSubmitting}
-                sx={{
-                  flex: 1,
-                  cursor: 'pointer',
-                  borderColor: '#cbd5e1',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
-                }}
-              />
-            </Box>
           </Box>
         </CardContent>
       </Card>
