@@ -63,6 +63,7 @@ const Salons = () => {
   });
   const [dialogError, setDialogError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [actionSuccess, setActionSuccess] = useState('');
 
   // Subscription Modals State
@@ -145,13 +146,40 @@ const Salons = () => {
     setDialogOpen(false);
     setEditingSalon(null);
     setDialogError('');
+    setIsLocating(false);
   };
 
-  const handleUseCurrentLocation = () => {
+  const handleUseCurrentLocation = async () => {
+    setDialogError('');
+    setIsLocating(true);
+
+    const tryIpFallback = async () => {
+      try {
+        const res = await fetch('https://ipwho.is/');
+        const data = await res.json();
+        if (data && data.success !== false && data.latitude && data.longitude) {
+          setFormData((prev) => ({
+            ...prev,
+            latitude: String(Number(data.latitude).toFixed(6)),
+            longitude: String(Number(data.longitude).toFixed(6)),
+          }));
+          return true;
+        }
+      } catch (e) {
+        console.warn('IP fallback failed:', e);
+      }
+      return false;
+    };
+
     if (!navigator.geolocation) {
-      setDialogError('Geolocation is not supported by your browser.');
+      const ok = await tryIpFallback();
+      setIsLocating(false);
+      if (!ok) {
+        setDialogError('Geolocation is not supported by your browser. Please enter coordinates manually.');
+      }
       return;
     }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setFormData((prev) => ({
@@ -159,11 +187,21 @@ const Salons = () => {
           latitude: String(pos.coords.latitude.toFixed(6)),
           longitude: String(pos.coords.longitude.toFixed(6)),
         }));
+        setIsLocating(false);
       },
-      (err) => {
-        setDialogError('Failed to retrieve current location: ' + err.message);
+      async (err) => {
+        console.warn('Browser geolocation failed (' + err.message + '), trying IP fallback...');
+        const ok = await tryIpFallback();
+        setIsLocating(false);
+        if (!ok) {
+          setDialogError('Failed to retrieve current location: ' + err.message + '. Please enter latitude and longitude manually.');
+        }
       },
-      { enableHighAccuracy: true }
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
     );
   };
   console.log("formData------", formData)
@@ -535,11 +573,12 @@ const Salons = () => {
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<MyLocationIcon />}
+                disabled={isLocating}
+                startIcon={isLocating ? <CircularProgress size={16} color="inherit" /> : <MyLocationIcon />}
                 onClick={handleUseCurrentLocation}
                 sx={{ alignSelf: 'flex-start', textTransform: 'none', borderRadius: '8px', color: '#6366f1', borderColor: '#cbd5e1' }}
               >
-                Use My Current Device Location
+                {isLocating ? 'Detecting Location...' : 'Use My Current Device Location'}
               </Button>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
