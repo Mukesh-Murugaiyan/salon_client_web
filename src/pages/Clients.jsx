@@ -50,6 +50,8 @@ import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import AppModal from '../components/common/AppModal';
+import DebouncedSearchInput from '../components/common/DebouncedSearchInput';
 import { usePermission } from '../hooks/usePermission';
 import { GENDER_OPTIONS, GENDER_MAP } from '../constants/client';
 import clientApi from '../api/clientApi';
@@ -87,7 +89,11 @@ const Clients = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await clientApi.listClients();
+      const params = {};
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+      const res = await clientApi.listClients(params);
       setClients(res.clients || []);
     } catch (err) {
       console.error('[Clients] Load failed:', err);
@@ -95,7 +101,7 @@ const Clients = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchClients();
@@ -187,21 +193,10 @@ const Clients = () => {
     }
   };
 
-  // Filter & Search Logic
+  // Filter by status tab (search is handled on backend)
   const filteredClients = clients.filter((c) => {
-    // Status filter
     if (statusFilter === 'active' && !c.isActive) return false;
     if (statusFilter === 'inactive' && c.isActive) return false;
-
-    // Search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      const matchName = c.name?.toLowerCase().includes(query);
-      const matchPhone = c.phone?.toLowerCase().includes(query);
-      const matchEmail = c.email?.toLowerCase().includes(query);
-      return matchName || matchPhone || matchEmail;
-    }
-
     return true;
   });
 
@@ -249,20 +244,13 @@ const Clients = () => {
           alignItems: 'center',
         }}
       >
-        <TextField
-          placeholder="Search by name, phone, or email..."
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: { xs: '100%', sm: 320 }, backgroundColor: '#ffffff' }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" sx={{ color: '#94a3b8' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box sx={{ width: { xs: '100%', sm: 320 } }}>
+          <DebouncedSearchInput
+            placeholder="Search by name, phone, or email..."
+            value={searchQuery}
+            onSearchChange={(val) => setSearchQuery(val)}
+          />
+        </Box>
 
         <Tabs
           value={statusFilter}
@@ -304,8 +292,8 @@ const Clients = () => {
         />
       ) : (
         <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 650 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 280px)' }}>
+            <Table stickyHeader sx={{ minWidth: 650 }}>
               <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Client</TableCell>
@@ -435,97 +423,20 @@ const Clients = () => {
       )}
 
       {/* Add / Edit Client Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-            {editingClient ? 'Edit Client Record' : 'Register New Client'}
-          </DialogTitle>
-          <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
-            {dialogError && <Alert severity="error">{dialogError}</Alert>}
-
-            <TextField
-              label="Full Name"
-              required
-              fullWidth
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Olivia Wilde"
-              autoFocus
-            />
-
-            <TextField
-              label="Phone Number"
-              required
-              fullWidth
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="e.g. +1-555-0199"
-              helperText="Unique identifier used for appointment lookup"
-            />
-
-            <TextField
-              label="Email Address (Optional)"
-              type="email"
-              fullWidth
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="olivia@example.com"
-            />
-
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel id="client-gender-label">Gender</InputLabel>
-                <Select
-                  labelId="client-gender-label"
-                  label="Gender"
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                >
-                  {GENDER_OPTIONS.map((g) => (
-                    <MenuItem key={g.value} value={g.value}>
-                      {g.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <TextField
-                label="Date of Birth"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-              />
-            </Box>
-
-            <TextField
-              label="Client Preferences & Notes"
-              multiline
-              rows={3}
-              fullWidth
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Color formulas, hair type, sensitivities, allergies, preferred stylists..."
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={formData.isActive ? 'Active Client' : 'Inactive Client'}
-            />
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
+      <AppModal
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        title={editingClient ? 'Edit Client Record' : 'Register New Client'}
+        disableClose={isSubmitting}
+        actions={
+          <>
             <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
               Cancel
             </Button>
             <Button
               type="submit"
+              form="client-form"
               variant="contained"
               disabled={isSubmitting}
               sx={{
@@ -543,142 +454,217 @@ const Clients = () => {
                 'Register Client'
               )}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box component="form" id="client-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          {dialogError && <Alert severity="error">{dialogError}</Alert>}
+
+          <TextField
+            label="Full Name"
+            required
+            fullWidth
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g. Olivia Wilde"
+            autoFocus
+          />
+
+          <TextField
+            label="Phone Number"
+            required
+            fullWidth
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            placeholder="e.g. +1-555-0199"
+            helperText="Unique identifier used for appointment lookup"
+          />
+
+          <TextField
+            label="Email Address (Optional)"
+            type="email"
+            fullWidth
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="olivia@example.com"
+          />
+
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel id="client-gender-label">Gender</InputLabel>
+              <Select
+                labelId="client-gender-label"
+                label="Gender"
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+              >
+                {GENDER_OPTIONS.map((g) => (
+                  <MenuItem key={g.value} value={g.value}>
+                    {g.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Date of Birth"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={formData.dateOfBirth}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            />
+          </Box>
+
+          <TextField
+            label="Client Preferences & Notes"
+            multiline
+            rows={3}
+            fullWidth
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="Color formulas, hair type, sensitivities, allergies, preferred stylists..."
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isActive ? 'Active Client' : 'Inactive Client'}
+          />
+        </Box>
+      </AppModal>
 
       {/* View Client Profile Dialog */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span>Client Profile</span>
-          {viewingClient && (
-            <Chip
-              size="small"
-              label={viewingClient.isActive ? 'Active' : 'Inactive'}
-              color={viewingClient.isActive ? 'success' : 'default'}
-              variant="outlined"
-            />
-          )}
-        </DialogTitle>
-        <DialogContent dividers sx={{ pt: 2.5 }}>
-          {viewingClient && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    color: '#6366f1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: '1.25rem',
-                  }}
-                >
-                  {viewingClient.name.charAt(0).toUpperCase()}
-                </Box>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                    {viewingClient.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Registered: {viewingClient.createdAt ? new Date(viewingClient.createdAt).toLocaleDateString() : '—'}
-                  </Typography>
-                </Box>
+      <AppModal
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        maxWidth="sm"
+        title="Client Profile"
+        actions={
+          <>
+            <Button onClick={() => setViewDialogOpen(false)} color="inherit">
+              Close
+            </Button>
+            {can('clients', 'update') && viewingClient && (
+              <Button
+                variant="contained"
+                startIcon={<EditIcon />}
+                onClick={() => {
+                  setViewDialogOpen(false);
+                  handleOpenEdit(viewingClient);
+                }}
+                sx={{
+                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                }}
+              >
+                Edit Profile
+              </Button>
+            )}
+          </>
+        }
+      >
+        {viewingClient && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                  color: '#6366f1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '1.25rem',
+                }}
+              >
+                {viewingClient.name.charAt(0).toUpperCase()}
               </Box>
-
-              <Divider />
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <PhoneIcon fontSize="small" sx={{ color: '#6366f1' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Phone
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {viewingClient.phone}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <EmailIcon fontSize="small" sx={{ color: '#6366f1' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Email
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {viewingClient.email || 'None'}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <WcIcon fontSize="small" sx={{ color: '#6366f1' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Gender
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {GENDER_MAP[viewingClient.gender] || viewingClient.gender}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CakeIcon fontSize="small" sx={{ color: '#6366f1' }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                      Date of Birth
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {viewingClient.dateOfBirth ? new Date(viewingClient.dateOfBirth).toLocaleDateString() : 'Not provided'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              <Box sx={{ p: 2, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <NotesIcon fontSize="small" sx={{ color: '#64748b' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#334155' }}>
-                    Preferences & Notes
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {viewingClient.notes || 'No special notes recorded.'}
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                  {viewingClient.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Registered: {viewingClient.createdAt ? new Date(viewingClient.createdAt).toLocaleDateString() : '—'}
                 </Typography>
               </Box>
             </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.25 }}>
-          <Button onClick={() => setViewDialogOpen(false)} color="inherit">
-            Close
-          </Button>
-          {can('clients', 'update') && viewingClient && (
-            <Button
-              variant="contained"
-              startIcon={<EditIcon />}
-              onClick={() => {
-                setViewDialogOpen(false);
-                handleOpenEdit(viewingClient);
-              }}
-              sx={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                fontWeight: 600,
-                textTransform: 'none',
-              }}
-            >
-              Edit Profile
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+
+            <Divider />
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PhoneIcon fontSize="small" sx={{ color: '#6366f1' }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    Phone
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {viewingClient.phone}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EmailIcon fontSize="small" sx={{ color: '#6366f1' }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    Email
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {viewingClient.email || 'None'}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <WcIcon fontSize="small" sx={{ color: '#6366f1' }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    Gender
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {GENDER_MAP[viewingClient.gender] || viewingClient.gender}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CakeIcon fontSize="small" sx={{ color: '#6366f1' }} />
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    Date of Birth
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {viewingClient.dateOfBirth ? new Date(viewingClient.dateOfBirth).toLocaleDateString() : 'Not provided'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Box sx={{ p: 2, borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <NotesIcon fontSize="small" sx={{ color: '#64748b' }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#334155' }}>
+                  Preferences & Notes
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                {viewingClient.notes || 'No special notes recorded.'}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+      </AppModal>
     </PageContainer>
   );
 };

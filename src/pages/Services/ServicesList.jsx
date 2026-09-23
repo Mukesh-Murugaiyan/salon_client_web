@@ -43,6 +43,8 @@ import PageContainer from '../../components/layout/PageContainer';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
+import AppModal from '../../components/common/AppModal';
+import DebouncedSearchInput from '../../components/common/DebouncedSearchInput';
 import { usePermission } from '../../hooks/usePermission';
 import { servicesApi } from '../../api/servicesApi';
 
@@ -78,12 +80,16 @@ const ServicesList = () => {
   const [deletingService, setDeletingService] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch Services
+  // Fetch Services with backend search
   const fetchServices = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await servicesApi.listServices();
+      const params = {};
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+      const res = await servicesApi.listServices(params);
       setServices(res.services || []);
     } catch (err) {
       console.error('[ServicesList] Load failed:', err);
@@ -91,28 +97,23 @@ const ServicesList = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
 
-  // Search and status filtering
+  // Status filtering (search is performed on backend)
   const filteredServices = useMemo(() => {
     return services.filter((svc) => {
-      const matchesSearch =
-        !searchQuery ||
-        svc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (svc.description && svc.description.toLowerCase().includes(searchQuery.toLowerCase()));
-
       const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'active' && svc.isActive) ||
         (statusFilter === 'inactive' && !svc.isActive);
 
-      return matchesSearch && matchesStatus;
+      return matchesStatus;
     });
-  }, [services, searchQuery, statusFilter]);
+  }, [services, statusFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -381,20 +382,13 @@ const ServicesList = () => {
             <Tab label={`Inactive (${stats.inactive})`} value="inactive" />
           </Tabs>
 
-          <TextField
-            size="small"
-            placeholder="Search by name or description..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: { xs: '100%', sm: 260 } }}
-          />
+          <Box sx={{ width: { xs: '100%', sm: 260 } }}>
+            <DebouncedSearchInput
+              value={searchQuery}
+              onSearchChange={(val) => setSearchQuery(val)}
+              placeholder="Search by name or description..."
+            />
+          </Box>
         </Box>
 
         {/* Directory Table */}
@@ -421,8 +415,8 @@ const ServicesList = () => {
             }
           />
         ) : (
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 650 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 280px)' }}>
+            <Table stickyHeader sx={{ minWidth: 650 }}>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Service</TableCell>
@@ -548,85 +542,20 @@ const ServicesList = () => {
       </Card>
 
       {/* Modal: Create / Edit Service */}
-      <Dialog open={dialogOpen} onClose={() => !isSubmitting && setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700 }}>
-            {editingService ? 'Edit Service' : 'Add New Service'}
-          </DialogTitle>
-          <DialogContent dividers>
-            {dialogError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {dialogError}
-              </Alert>
-            )}
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
-              <TextField
-                label="Service Name"
-                required
-                fullWidth
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Deluxe Haircut & Blowdry"
-                helperText="Must be unique among active services in your salon"
-              />
-
-              <TextField
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of treatments and styling included..."
-              />
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                <TextField
-                  label="Duration (minutes)"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.durationInMinutes}
-                  onChange={(e) => setFormData({ ...formData, durationInMinutes: e.target.value })}
-                  inputProps={{ min: 1, step: 5 }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">min</InputAdornment>,
-                  }}
-                />
-
-                <TextField
-                  label="Price (₹)"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  inputProps={{ min: 0, step: 0.5 }}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                  }}
-                />
-              </Box>
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    color="primary"
-                  />
-                }
-                label="Service is active and bookable"
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
+      <AppModal
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="sm"
+        title={editingService ? 'Edit Service' : 'Add New Service'}
+        disableClose={isSubmitting}
+        actions={
+          <>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
             <Button
               type="submit"
+              form="service-form"
               variant="contained"
               disabled={isSubmitting}
               startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
@@ -634,122 +563,189 @@ const ServicesList = () => {
             >
               {isSubmitting ? 'Saving...' : editingService ? 'Save Changes' : 'Create Service'}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box component="form" id="service-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 1 }}>
+              {dialogError}
+            </Alert>
+          )}
+
+          <TextField
+            label="Service Name"
+            required
+            fullWidth
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., Deluxe Haircut & Blowdry"
+            helperText="Must be unique among active services in your salon"
+          />
+
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Brief description of treatments and styling included..."
+          />
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              label="Duration (minutes)"
+              type="number"
+              required
+              fullWidth
+              value={formData.durationInMinutes}
+              onChange={(e) => setFormData({ ...formData, durationInMinutes: e.target.value })}
+              inputProps={{ min: 1, step: 5 }}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">min</InputAdornment>,
+              }}
+            />
+
+            <TextField
+              label="Price (₹)"
+              type="number"
+              required
+              fullWidth
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              inputProps={{ min: 0, step: 0.5 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+              }}
+            />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                color="primary"
+              />
+            }
+            label="Service is active and bookable"
+          />
+        </Box>
+      </AppModal>
 
       {/* Modal: View Service Details */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="xs" fullWidth>
+      <AppModal
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        maxWidth="xs"
+        title="Service Details"
+        actions={
+          <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
+            Close
+          </Button>
+        }
+      >
         {viewingService && (
-          <>
-            <DialogTitle sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <SpaIcon color="primary" />
-              Service Details
-            </DialogTitle>
-            <DialogContent dividers>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Service Name
-                  </Typography>
-                  <Typography variant="h6" fontWeight={700}>
-                    {viewingService.name}
-                  </Typography>
-                </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Service Name
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {viewingService.name}
+              </Typography>
+            </Box>
 
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Description
-                  </Typography>
-                  <Typography variant="body2" color="text.primary">
-                    {viewingService.description || 'No description provided.'}
-                  </Typography>
-                </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Description
+              </Typography>
+              <Typography variant="body2" color="text.primary">
+                {viewingService.description || 'No description provided.'}
+              </Typography>
+            </Box>
 
-                <Divider />
+            <Divider />
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Duration
-                    </Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {viewingService.durationInMinutes} minutes
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Price
-                    </Typography>
-                    <Typography variant="body1" fontWeight={700} color="primary.main">
-                      ₹{Number(viewingService.price).toFixed(2)}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Status
-                  </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    <Chip
-                      label={viewingService.isActive ? 'Active' : 'Inactive'}
-                      size="small"
-                      color={viewingService.isActive ? 'success' : 'default'}
-                      variant={viewingService.isActive ? 'filled' : 'outlined'}
-                    />
-                  </Box>
-                </Box>
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Created: {new Date(viewingService.createdAt).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Updated: {new Date(viewingService.updatedAt).toLocaleDateString()}
-                  </Typography>
-                </Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Duration
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {viewingService.durationInMinutes} minutes
+                </Typography>
               </Box>
-            </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.25 }}>
-              <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
-                Close
-              </Button>
-            </DialogActions>
-          </>
+
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Price
+                </Typography>
+                <Typography variant="body1" fontWeight={700} color="primary.main">
+                  ₹{Number(viewingService.price).toFixed(2)}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Status
+              </Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <Chip
+                  label={viewingService.isActive ? 'Active' : 'Inactive'}
+                  size="small"
+                  color={viewingService.isActive ? 'success' : 'default'}
+                  variant={viewingService.isActive ? 'filled' : 'outlined'}
+                />
+              </Box>
+            </Box>
+
+            <Divider />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">
+                Created: {new Date(viewingService.createdAt).toLocaleDateString()}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Updated: {new Date(viewingService.updatedAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+          </Box>
         )}
-      </Dialog>
+      </AppModal>
 
       {/* Modal: Delete Confirmation */}
-      <Dialog open={deleteDialogOpen} onClose={() => !isDeleting && setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          Deactivate Service?
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
-            Are you sure you want to deactivate{' '}
-            <strong>{deletingService?.name}</strong>? It will no longer be available for new bookings, but historical records will be preserved.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.25 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting} sx={{ textTransform: 'none' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmDelete}
-            disabled={isDeleting}
-            startIcon={isDeleting && <CircularProgress size={18} color="inherit" />}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {isDeleting ? 'Deactivating...' : 'Deactivate'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AppModal
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        title="Deactivate Service?"
+        disableClose={isDeleting}
+        actions={
+          <>
+            <Button onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              startIcon={isDeleting && <CircularProgress size={18} color="inherit" />}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              {isDeleting ? 'Deactivating...' : 'Deactivate'}
+            </Button>
+          </>
+        }
+      >
+        <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
+          Are you sure you want to deactivate{' '}
+          <strong>{deletingService?.name}</strong>? It will no longer be available for new bookings, but historical records will be preserved.
+        </Typography>
+      </AppModal>
     </PageContainer>
   );
 };

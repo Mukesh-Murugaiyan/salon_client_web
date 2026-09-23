@@ -13,10 +13,6 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   FormControl,
   InputLabel,
@@ -49,6 +45,8 @@ import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import AppModal from '../components/common/AppModal';
+import DebouncedSearchInput from '../components/common/DebouncedSearchInput';
 import { usePermission } from '../hooks/usePermission';
 import { appointmentsApi } from '../api/appointmentsApi';
 import {
@@ -154,6 +152,7 @@ const Appointments = () => {
       if (selectedDate) params.date = selectedDate;
       if (selectedStaffId && selectedStaffId !== 'all') params.staffId = selectedStaffId;
       if (statusFilter && statusFilter !== 'all') params.status = statusFilter;
+      if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const res = await appointmentsApi.listAppointments(params);
       setAppointments(res.appointments || []);
@@ -163,7 +162,7 @@ const Appointments = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedDate, selectedStaffId, statusFilter]);
+  }, [selectedDate, selectedStaffId, statusFilter, searchQuery]);
 
   useEffect(() => {
     fetchReadiness();
@@ -183,23 +182,8 @@ const Appointments = () => {
     return calculateEndTime(formData.startTime, selectedService.durationInMinutes);
   }, [formData.startTime, selectedService]);
 
-  // Filtered Appointments
-  const filteredAppointments = useMemo(() => {
-    return appointments.filter((app) => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      const clientName = app.client?.name?.toLowerCase() || '';
-      const clientPhone = app.client?.phone?.toLowerCase() || '';
-      const staffName = app.staff?.name?.toLowerCase() || '';
-      const serviceName = app.service?.name?.toLowerCase() || '';
-      return (
-        clientName.includes(q) ||
-        clientPhone.includes(q) ||
-        staffName.includes(q) ||
-        serviceName.includes(q)
-      );
-    });
-  }, [appointments, searchQuery]);
+  // Appointments (backend handles search, date, staff, and status filtering)
+  const filteredAppointments = appointments;
 
   // Statistics
   const stats = useMemo(() => {
@@ -518,19 +502,10 @@ const Appointments = () => {
               </Select>
             </FormControl>
 
-            <TextField
-              size="small"
+            <DebouncedSearchInput
               placeholder="Search appointments..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: { xs: '100%', sm: 190 } }}
+              onSearch={setSearchQuery}
+              sx={{ width: { xs: '100%', sm: 220 } }}
             />
           </Box>
         </Box>
@@ -563,8 +538,8 @@ const Appointments = () => {
             }
           />
         ) : (
-          <TableContainer>
-            <Table sx={{ minWidth: 800 }}>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 280px)', minHeight: 400 }}>
+            <Table stickyHeader sx={{ minWidth: 800 }}>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
@@ -759,146 +734,20 @@ const Appointments = () => {
       </Menu>
 
       {/* Modal: Book / Edit Appointment */}
-      <Dialog open={dialogOpen} onClose={() => !isSubmitting && setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700 }}>
-            {editingAppointment ? 'Edit Appointment' : 'Book Salon Appointment'}
-          </DialogTitle>
-          <DialogContent dividers>
-            {dialogError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {dialogError}
-              </Alert>
-            )}
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
-              {/* Client Selector */}
-              <FormControl fullWidth required>
-                <InputLabel>Client</InputLabel>
-                <Select
-                  value={formData.clientId}
-                  label="Client"
-                  onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                >
-                  {clients.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name} — {c.phone}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Service Selector */}
-              <FormControl fullWidth required>
-                <InputLabel>Service</InputLabel>
-                <Select
-                  value={formData.serviceId}
-                  label="Service"
-                  onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
-                >
-                  {services.map((s) => (
-                    <MenuItem key={s.id} value={s.id}>
-                      {s.name} ({s.durationInMinutes} mins — ₹{Number(s.price).toFixed(2)})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Staff Member Selector */}
-              <FormControl fullWidth required>
-                <InputLabel>Staff Specialist</InputLabel>
-                <Select
-                  value={formData.staffId}
-                  label="Staff Specialist"
-                  onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
-                >
-                  {staffMembers.map((st) => (
-                    <MenuItem key={st.id} value={st.id}>
-                      {st.name} — {st.title} {st.specialization ? `(${st.specialization})` : ''}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Date & Start Time */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                <TextField
-                  label="Appointment Date"
-                  type="date"
-                  required
-                  fullWidth
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-
-                <TextField
-                  label="Start Time"
-                  type="time"
-                  required
-                  fullWidth
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                  helperText={`Hours: ${BUSINESS_HOURS.START}–${BUSINESS_HOURS.END}`}
-                />
-              </Box>
-
-              {/* Dynamic Duration and End Time Notice */}
-              {selectedService && computedEndTime && (
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: 'primary.light',
-                    color: 'primary.dark',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Typography variant="body2" fontWeight={600}>
-                    Service Duration: {selectedService.durationInMinutes} minutes
-                  </Typography>
-                  <Typography variant="body2" fontWeight={700}>
-                    Estimated End Time: {computedEndTime}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* Initial Status Selector */}
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={formData.status}
-                  label="Status"
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                >
-                  <MenuItem value={APPOINTMENT_STATUS.CONFIRMED}>Confirmed</MenuItem>
-                  <MenuItem value={APPOINTMENT_STATUS.PENDING}>Pending</MenuItem>
-                  <MenuItem value={APPOINTMENT_STATUS.COMPLETED}>Completed</MenuItem>
-                  <MenuItem value={APPOINTMENT_STATUS.CANCELLED}>Cancelled</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Notes */}
-              <TextField
-                label="Appointment Notes (Optional)"
-                fullWidth
-                multiline
-                rows={2}
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Special requests, treatment preferences, client allergies..."
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
+      <AppModal
+        open={dialogOpen}
+        onClose={() => !isSubmitting && setDialogOpen(false)}
+        maxWidth="sm"
+        title={editingAppointment ? 'Edit Appointment' : 'Book Salon Appointment'}
+        disableClose={isSubmitting}
+        actions={
+          <>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
             <Button
               type="submit"
+              form="appointment-form"
               variant="contained"
               disabled={isSubmitting}
               startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
@@ -906,146 +755,279 @@ const Appointments = () => {
             >
               {isSubmitting ? 'Saving...' : editingAppointment ? 'Save Changes' : 'Confirm Booking'}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box component="form" id="appointment-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          {dialogError && (
+            <Alert severity="error">
+              {dialogError}
+            </Alert>
+          )}
+
+          {/* Client Selector */}
+          <FormControl fullWidth required>
+            <InputLabel>Client</InputLabel>
+            <Select
+              value={formData.clientId}
+              label="Client"
+              onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
+            >
+              {clients.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name} — {c.phone}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Service Selector */}
+          <FormControl fullWidth required>
+            <InputLabel>Service</InputLabel>
+            <Select
+              value={formData.serviceId}
+              label="Service"
+              onChange={(e) => setFormData({ ...formData, serviceId: e.target.value })}
+            >
+              {services.map((s) => (
+                <MenuItem key={s.id} value={s.id}>
+                  {s.name} ({s.durationInMinutes} mins — ₹{Number(s.price).toFixed(2)})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Staff Member Selector */}
+          <FormControl fullWidth required>
+            <InputLabel>Staff Specialist</InputLabel>
+            <Select
+              value={formData.staffId}
+              label="Staff Specialist"
+              onChange={(e) => setFormData({ ...formData, staffId: e.target.value })}
+            >
+              {staffMembers.map((st) => (
+                <MenuItem key={st.id} value={st.id}>
+                  {st.name} — {st.title} {st.specialization ? `(${st.specialization})` : ''}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Date & Start Time */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <TextField
+              label="Appointment Date"
+              type="date"
+              required
+              fullWidth
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              label="Start Time"
+              type="time"
+              required
+              fullWidth
+              value={formData.startTime}
+              onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              helperText={`Hours: ${BUSINESS_HOURS.START}–${BUSINESS_HOURS.END}`}
+            />
+          </Box>
+
+          {/* Dynamic Duration and End Time Notice */}
+          {selectedService && computedEndTime && (
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: 'primary.light',
+                color: 'primary.dark',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography variant="body2" fontWeight={600}>
+                Service Duration: {selectedService.durationInMinutes} minutes
+              </Typography>
+              <Typography variant="body2" fontWeight={700}>
+                Estimated End Time: {computedEndTime}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Initial Status Selector */}
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={formData.status}
+              label="Status"
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            >
+              <MenuItem value={APPOINTMENT_STATUS.CONFIRMED}>Confirmed</MenuItem>
+              <MenuItem value={APPOINTMENT_STATUS.PENDING}>Pending</MenuItem>
+              <MenuItem value={APPOINTMENT_STATUS.COMPLETED}>Completed</MenuItem>
+              <MenuItem value={APPOINTMENT_STATUS.CANCELLED}>Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Notes */}
+          <TextField
+            label="Appointment Notes (Optional)"
+            fullWidth
+            multiline
+            rows={2}
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="Special requests, treatment preferences, client allergies..."
+          />
+        </Box>
+      </AppModal>
 
       {/* Modal: View Appointment Details */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="xs" fullWidth>
+      <AppModal
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        maxWidth="xs"
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <CalendarMonthIcon color="primary" />
+            <Typography variant="h6" fontWeight={700}>Appointment Overview</Typography>
+          </Box>
+        }
+        actions={
+          <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
+            Close
+          </Button>
+        }
+      >
         {viewingAppointment && (
-          <>
-            <DialogTitle sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <CalendarMonthIcon color="primary" />
-              Appointment Overview
-            </DialogTitle>
-            <DialogContent dividers>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-                {/* Time & Status Banner */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Date & Schedule
-                    </Typography>
-                    <Typography variant="h6" fontWeight={700}>
-                      {viewingAppointment.startTime} – {viewingAppointment.endTime}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {viewingAppointment.date}
-                    </Typography>
-                  </Box>
-                  <Chip
-                    label={viewingAppointment.status}
-                    sx={{
-                      bgcolor: STATUS_CONFIG[viewingAppointment.status]?.bg || '#f1f5f9',
-                      color: STATUS_CONFIG[viewingAppointment.status]?.textColor || '#475569',
-                      fontWeight: 700,
-                    }}
-                  />
-                </Box>
-
-                <Divider />
-
-                {/* Client Info */}
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Client
-                  </Typography>
-                  <Typography variant="body1" fontWeight={600}>
-                    {viewingAppointment.client?.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {viewingAppointment.client?.phone} • {viewingAppointment.client?.email || 'No email'}
-                  </Typography>
-                </Box>
-
-                {/* Service Info */}
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Service
-                  </Typography>
-                  <Typography variant="body1" fontWeight={600}>
-                    {viewingAppointment.service?.name}
-                  </Typography>
-                  <Typography variant="body2" color="primary.main" fontWeight={600}>
-                    {viewingAppointment.service?.durationInMinutes} mins • ₹{Number(viewingAppointment.service?.price || 0).toFixed(2)}
-                  </Typography>
-                </Box>
-
-                {/* Staff Info */}
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Staff Specialist
-                  </Typography>
-                  <Typography variant="body1" fontWeight={600}>
-                    {viewingAppointment.staff?.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {viewingAppointment.staff?.title}
-                  </Typography>
-                </Box>
-
-                {viewingAppointment.notes && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Notes
-                    </Typography>
-                    <Typography variant="body2" color="text.primary">
-                      {viewingAppointment.notes}
-                    </Typography>
-                  </Box>
-                )}
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Booked: {new Date(viewingAppointment.createdAt).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Updated: {new Date(viewingAppointment.updatedAt).toLocaleDateString()}
-                  </Typography>
-                </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Time & Status Banner */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Date & Schedule
+                </Typography>
+                <Typography variant="h6" fontWeight={700}>
+                  {viewingAppointment.startTime} – {viewingAppointment.endTime}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {viewingAppointment.date}
+                </Typography>
               </Box>
-            </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.25 }}>
-              <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
-                Close
-              </Button>
-            </DialogActions>
-          </>
+              <Chip
+                label={viewingAppointment.status}
+                sx={{
+                  bgcolor: STATUS_CONFIG[viewingAppointment.status]?.bg || '#f1f5f9',
+                  color: STATUS_CONFIG[viewingAppointment.status]?.textColor || '#475569',
+                  fontWeight: 700,
+                }}
+              />
+            </Box>
+
+            <Divider />
+
+            {/* Client Info */}
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Client
+              </Typography>
+              <Typography variant="body1" fontWeight={600}>
+                {viewingAppointment.client?.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {viewingAppointment.client?.phone} • {viewingAppointment.client?.email || 'No email'}
+              </Typography>
+            </Box>
+
+            {/* Service Info */}
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Service
+              </Typography>
+              <Typography variant="body1" fontWeight={600}>
+                {viewingAppointment.service?.name}
+              </Typography>
+              <Typography variant="body2" color="primary.main" fontWeight={600}>
+                {viewingAppointment.service?.durationInMinutes} mins • ₹{Number(viewingAppointment.service?.price || 0).toFixed(2)}
+              </Typography>
+            </Box>
+
+            {/* Staff Info */}
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Staff Specialist
+              </Typography>
+              <Typography variant="body1" fontWeight={600}>
+                {viewingAppointment.staff?.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {viewingAppointment.staff?.title}
+              </Typography>
+            </Box>
+
+            {viewingAppointment.notes && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Notes
+                </Typography>
+                <Typography variant="body2" color="text.primary">
+                  {viewingAppointment.notes}
+                </Typography>
+              </Box>
+            )}
+
+            <Divider />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">
+                Booked: {new Date(viewingAppointment.createdAt).toLocaleDateString()}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Updated: {new Date(viewingAppointment.updatedAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+          </Box>
         )}
-      </Dialog>
+      </AppModal>
 
       {/* Modal: Cancel Booking Confirmation */}
-      <Dialog open={cancelDialogOpen} onClose={() => !isCancelling && setCancelDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          Cancel Appointment?
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
-            Are you sure you want to cancel the booking for{' '}
-            <strong>{cancellingAppointment?.client?.name}</strong> with{' '}
-            <strong>{cancellingAppointment?.staff?.name}</strong> on{' '}
-            <strong>{cancellingAppointment?.date}</strong> at{' '}
-            <strong>{cancellingAppointment?.startTime}</strong>?
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.25 }}>
-          <Button onClick={() => setCancelDialogOpen(false)} disabled={isCancelling} sx={{ textTransform: 'none' }}>
-            Back
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmCancel}
-            disabled={isCancelling}
-            startIcon={isCancelling && <CircularProgress size={18} color="inherit" />}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {isCancelling ? 'Cancelling...' : 'Cancel Appointment'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AppModal
+        open={cancelDialogOpen}
+        onClose={() => !isCancelling && setCancelDialogOpen(false)}
+        maxWidth="xs"
+        title="Cancel Appointment?"
+        disableClose={isCancelling}
+        actions={
+          <>
+            <Button onClick={() => setCancelDialogOpen(false)} disabled={isCancelling} sx={{ textTransform: 'none' }}>
+              Back
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleConfirmCancel}
+              disabled={isCancelling}
+              startIcon={isCancelling && <CircularProgress size={18} color="inherit" />}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel Appointment'}
+            </Button>
+          </>
+        }
+      >
+        <Typography variant="body2" color="text.secondary">
+          Are you sure you want to cancel the booking for{' '}
+          <strong>{cancellingAppointment?.client?.name}</strong> with{' '}
+          <strong>{cancellingAppointment?.staff?.name}</strong> on{' '}
+          <strong>{cancellingAppointment?.date}</strong> at{' '}
+          <strong>{cancellingAppointment?.startTime}</strong>?
+        </Typography>
+      </AppModal>
     </PageContainer>
   );
 };

@@ -301,6 +301,9 @@ const RoleDetail = () => {
               borderBottom: '1px solid #e2e8f0',
               flexWrap: 'wrap',
               gap: 1,
+              position: 'sticky',
+              top: 0,
+              zIndex: 5,
             }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155' }}>
@@ -328,17 +331,17 @@ const RoleDetail = () => {
             </Box>
           </Box>
 
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead sx={{ backgroundColor: '#ffffff' }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 250px)' }}>
+            <Table stickyHeader sx={{ minWidth: 650 }}>
+              <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, color: '#475569', minWidth: 200 }}>Module / Resource</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#475569', minWidth: 200, bgcolor: '#ffffff', zIndex: 4 }}>Module / Resource</TableCell>
                   {allActions.map((action) => (
-                    <TableCell key={action} align="center" sx={{ fontWeight: 700, color: '#475569', textTransform: 'capitalize', minWidth: 100 }}>
+                    <TableCell key={action} align="center" sx={{ fontWeight: 700, color: '#475569', textTransform: 'capitalize', minWidth: 100, bgcolor: '#ffffff', zIndex: 4 }}>
                       {action.replace('_', ' ')}
                     </TableCell>
                   ))}
-                  <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', width: 130 }}>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#475569', width: 130, bgcolor: '#ffffff', zIndex: 4 }}>
                     Row Toggle
                   </TableCell>
                 </TableRow>

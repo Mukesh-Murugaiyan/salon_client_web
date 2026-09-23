@@ -13,10 +13,6 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   FormControlLabel,
   Switch,
@@ -41,6 +37,7 @@ import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import AppModal from '../components/common/AppModal';
 import { usePermission } from '../hooks/usePermission';
 import { plansApi } from '../api/plansApi';
 
@@ -289,8 +286,8 @@ const Plans = () => {
             }
           />
         ) : (
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 700 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 280px)' }}>
+            <Table stickyHeader sx={{ minWidth: 700 }}>
               <TableHead sx={{ bgcolor: 'grey.50' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600 }}>Plan Tier</TableCell>
@@ -412,108 +409,21 @@ const Plans = () => {
       </Card>
 
       {/* Modal: Create / Edit Plan */}
-      <Dialog open={dialogOpen} onClose={() => !isSubmitting && setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700 }}>
-            {editingPlan ? 'Edit Subscription Plan' : 'Create Subscription Plan'}
-          </DialogTitle>
-          <DialogContent dividers>
-            {dialogError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {dialogError}
-              </Alert>
-            )}
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
-              <TextField
-                label="Plan Name"
-                required
-                fullWidth
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Growth Tier, Boutique Studio, Enterprise"
-              />
-
-              <TextField
-                label="Description"
-                fullWidth
-                multiline
-                rows={2}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Target salon size, included features and support..."
-              />
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                <TextField
-                  label="Price (₹)"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  inputProps={{ min: 0, step: 0.01 }}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                  }}
-                />
-
-                <TextField
-                  label="Duration (Days)"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.durationInDays}
-                  onChange={(e) => setFormData({ ...formData, durationInDays: e.target.value })}
-                  inputProps={{ min: 1 }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">days</InputAdornment>,
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                <TextField
-                  label="Max Staff Limit"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.maxStaff}
-                  onChange={(e) => setFormData({ ...formData, maxStaff: e.target.value })}
-                  inputProps={{ min: 1 }}
-                  helperText="Maximum concurrent active stylists/staff"
-                />
-
-                <TextField
-                  label="Max Appointments Limit"
-                  type="number"
-                  required
-                  fullWidth
-                  value={formData.maxAppointments}
-                  onChange={(e) => setFormData({ ...formData, maxAppointments: e.target.value })}
-                  inputProps={{ min: 1 }}
-                  helperText="Max bookings allowed per billing cycle"
-                />
-              </Box>
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    color="primary"
-                  />
-                }
-                label="Plan is active and available for salon assignment"
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
+      {/* Modal: Create / Edit Plan */}
+      <AppModal
+        open={dialogOpen}
+        onClose={() => !isSubmitting && setDialogOpen(false)}
+        maxWidth="sm"
+        title={editingPlan ? 'Edit Subscription Plan' : 'Create Subscription Plan'}
+        disableClose={isSubmitting}
+        actions={
+          <>
             <Button onClick={() => setDialogOpen(false)} disabled={isSubmitting} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
             <Button
               type="submit"
+              form="plan-form"
               variant="contained"
               disabled={isSubmitting}
               startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
@@ -521,125 +431,220 @@ const Plans = () => {
             >
               {isSubmitting ? 'Saving...' : editingPlan ? 'Save Changes' : 'Create Plan'}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box component="form" id="plan-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          {dialogError && (
+            <Alert severity="error">
+              {dialogError}
+            </Alert>
+          )}
+
+          <TextField
+            label="Plan Name"
+            required
+            fullWidth
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., Growth Tier, Boutique Studio, Enterprise"
+          />
+
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={2}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Target salon size, included features and support..."
+          />
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              label="Price (₹)"
+              type="number"
+              required
+              fullWidth
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              inputProps={{ min: 0, step: 0.01 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+              }}
+            />
+
+            <TextField
+              label="Duration (Days)"
+              type="number"
+              required
+              fullWidth
+              value={formData.durationInDays}
+              onChange={(e) => setFormData({ ...formData, durationInDays: e.target.value })}
+              inputProps={{ min: 1 }}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">days</InputAdornment>,
+              }}
+            />
+          </Box>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              label="Max Staff Limit"
+              type="number"
+              required
+              fullWidth
+              value={formData.maxStaff}
+              onChange={(e) => setFormData({ ...formData, maxStaff: e.target.value })}
+              inputProps={{ min: 1 }}
+              helperText="Maximum concurrent active stylists/staff"
+            />
+
+            <TextField
+              label="Max Appointments Limit"
+              type="number"
+              required
+              fullWidth
+              value={formData.maxAppointments}
+              onChange={(e) => setFormData({ ...formData, maxAppointments: e.target.value })}
+              inputProps={{ min: 1 }}
+              helperText="Max bookings allowed per billing cycle"
+            />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                color="primary"
+              />
+            }
+            label="Plan is active and available for salon assignment"
+          />
+        </Box>
+      </AppModal>
 
       {/* Modal: View Plan Details */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="xs" fullWidth>
+      <AppModal
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        maxWidth="xs"
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <LayersIcon color="primary" />
+            <Typography variant="h6" fontWeight={700}>Plan Details</Typography>
+          </Box>
+        }
+        actions={
+          <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
+            Close
+          </Button>
+        }
+      >
         {viewingPlan && (
-          <>
-            <DialogTitle sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <LayersIcon color="primary" />
-              Plan Details
-            </DialogTitle>
-            <DialogContent dividers>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Plan Name
-                  </Typography>
-                  <Typography variant="h6" fontWeight={700}>
-                    {viewingPlan.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {viewingPlan.description || 'No description provided.'}
-                  </Typography>
-                </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Plan Name
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {viewingPlan.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {viewingPlan.description || 'No description provided.'}
+              </Typography>
+            </Box>
 
-                <Divider />
+            <Divider />
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Price
-                    </Typography>
-                    <Typography variant="body1" fontWeight={700} color="primary.main">
-                      ₹{Number(viewingPlan.price).toFixed(2)}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Duration
-                    </Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {viewingPlan.durationInDays} days
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Max Staff Limit
-                    </Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {viewingPlan.maxStaff} staff
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Max Appointments
-                    </Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {viewingPlan.maxAppointments} bookings
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Status
-                  </Typography>
-                  <Box sx={{ mt: 0.5 }}>
-                    <Chip
-                      label={viewingPlan.isActive ? 'Active' : 'Inactive'}
-                      size="small"
-                      color={viewingPlan.isActive ? 'success' : 'default'}
-                      variant={viewingPlan.isActive ? 'filled' : 'outlined'}
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </Box>
-                </Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Price
+                </Typography>
+                <Typography variant="body1" fontWeight={700} color="primary.main">
+                  ₹{Number(viewingPlan.price).toFixed(2)}
+                </Typography>
               </Box>
-            </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.25 }}>
-              <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none' }}>
-                Close
-              </Button>
-            </DialogActions>
-          </>
+
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Duration
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {viewingPlan.durationInDays} days
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Max Staff Limit
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {viewingPlan.maxStaff} staff
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Max Appointments
+                </Typography>
+                <Typography variant="body1" fontWeight={600}>
+                  {viewingPlan.maxAppointments} bookings
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Status
+              </Typography>
+              <Box sx={{ mt: 0.5 }}>
+                <Chip
+                  label={viewingPlan.isActive ? 'Active' : 'Inactive'}
+                  size="small"
+                  color={viewingPlan.isActive ? 'success' : 'default'}
+                  variant={viewingPlan.isActive ? 'filled' : 'outlined'}
+                  sx={{ fontWeight: 600 }}
+                />
+              </Box>
+            </Box>
+          </Box>
         )}
-      </Dialog>
+      </AppModal>
 
       {/* Modal: Deactivate Confirmation */}
-      <Dialog open={deactivateDialogOpen} onClose={() => !isDeactivating && setDeactivateDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          Deactivate Plan?
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
-            Are you sure you want to deactivate <strong>{targetPlan?.name}</strong>? It will no longer be available for salons to select.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.25 }}>
-          <Button onClick={() => setDeactivateDialogOpen(false)} disabled={isDeactivating} sx={{ textTransform: 'none' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmDeactivate}
-            disabled={isDeactivating}
-            startIcon={isDeactivating && <CircularProgress size={18} color="inherit" />}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {isDeactivating ? 'Deactivating...' : 'Deactivate'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AppModal
+        open={deactivateDialogOpen}
+        onClose={() => !isDeactivating && setDeactivateDialogOpen(false)}
+        maxWidth="xs"
+        title="Deactivate Plan?"
+        disableClose={isDeactivating}
+        actions={
+          <>
+            <Button onClick={() => setDeactivateDialogOpen(false)} disabled={isDeactivating} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleConfirmDeactivate}
+              disabled={isDeactivating}
+              startIcon={isDeactivating && <CircularProgress size={18} color="inherit" />}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              {isDeactivating ? 'Deactivating...' : 'Deactivate'}
+            </Button>
+          </>
+        }
+      >
+        <Typography variant="body2" color="text.secondary">
+          Are you sure you want to deactivate <strong>{targetPlan?.name}</strong>? It will no longer be available for salons to select.
+        </Typography>
+      </AppModal>
     </PageContainer>
   );
 };

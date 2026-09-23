@@ -11,10 +11,6 @@ import {
   Typography,
   Button,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Alert,
   CircularProgress,
   LinearProgress,
@@ -40,6 +36,7 @@ import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import AppModal from '../components/common/AppModal';
 import { usePermission } from '../hooks/usePermission';
 import { subscriptionApi } from '../api/subscriptionApi';
 import { plansApi } from '../api/plansApi';
@@ -488,8 +485,8 @@ const Subscriptions = () => {
                 description="No subscription assignments or renewals have occurred yet for this salon."
               />
             ) : (
-              <TableContainer>
-                <Table sx={{ minWidth: 650 }}>
+              <TableContainer sx={{ maxHeight: 400 }}>
+                <Table stickyHeader sx={{ minWidth: 650 }}>
                   <TableHead sx={{ bgcolor: 'grey.50' }}>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
@@ -549,108 +546,114 @@ const Subscriptions = () => {
           </Card>}
 
           {/* Modal: Assign / Upgrade Plan */}
-          <Dialog open={planDialogOpen} onClose={() => !isUpgrading && setPlanDialogOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle sx={{ fontWeight: 700 }}>
-              {subscription?.plan ? 'Upgrade / Switch Subscription Plan' : 'Assign Salon Subscription Plan'}
-            </DialogTitle>
-            <DialogContent dividers>
-              {planDialogError && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {planDialogError}
-                </Alert>
-              )}
+          <AppModal
+            open={planDialogOpen}
+            onClose={() => !isUpgrading && setPlanDialogOpen(false)}
+            maxWidth="sm"
+            title={subscription?.plan ? 'Upgrade / Switch Subscription Plan' : 'Assign Salon Subscription Plan'}
+            disableClose={isUpgrading}
+            actions={
+              <>
+                <Button onClick={() => setPlanDialogOpen(false)} disabled={isUpgrading} sx={{ textTransform: 'none' }}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleConfirmPlanChange}
+                  disabled={isUpgrading || !selectedPlanId}
+                  startIcon={isUpgrading && <CircularProgress size={18} color="inherit" />}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  {isUpgrading ? 'Updating...' : subscription?.plan ? 'Confirm Upgrade' : 'Assign Plan'}
+                </Button>
+              </>
+            }
+          >
+            {planDialogError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {planDialogError}
+              </Alert>
+            )}
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Select a plan tier below. Your salon limits and billing cycle duration will immediately update upon confirmation:
-              </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Select a plan tier below. Your salon limits and billing cycle duration will immediately update upon confirmation:
+            </Typography>
 
-              <RadioGroup
-                value={selectedPlanId}
-                onChange={(e) => setSelectedPlanId(e.target.value)}
-              >
-                {availablePlans.map((p) => (
-                  <Card
-                    key={p.id}
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      mb: 1.5,
-                      borderRadius: 2,
-                      borderColor: selectedPlanId === p.id ? 'primary.main' : 'divider',
-                      bgcolor: selectedPlanId === p.id ? 'primary.light' : 'background.paper',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => setSelectedPlanId(p.id)}
-                  >
-                    <FormControlLabel
-                      value={p.id}
-                      control={<Radio color="primary" />}
-                      label={
-                        <Box sx={{ ml: 1, width: '100%' }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="subtitle1" fontWeight={700}>
-                              {p.name}
-                            </Typography>
-                            <Typography variant="subtitle1" fontWeight={800} color="primary.main">
-                              ₹{Number(p.price).toFixed(2)}
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {p.durationInDays} Days • Up to {p.maxStaff} Staff • Up to {p.maxAppointments} Appointments
+            <RadioGroup
+              value={selectedPlanId}
+              onChange={(e) => setSelectedPlanId(e.target.value)}
+            >
+              {availablePlans.map((p) => (
+                <Card
+                  key={p.id}
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    mb: 1.5,
+                    borderRadius: 2,
+                    borderColor: selectedPlanId === p.id ? 'primary.main' : 'divider',
+                    bgcolor: selectedPlanId === p.id ? 'primary.light' : 'background.paper',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setSelectedPlanId(p.id)}
+                >
+                  <FormControlLabel
+                    value={p.id}
+                    control={<Radio color="primary" />}
+                    label={
+                      <Box sx={{ ml: 1, width: '100%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="subtitle1" fontWeight={700}>
+                            {p.name}
+                          </Typography>
+                          <Typography variant="subtitle1" fontWeight={800} color="primary.main">
+                            ₹{Number(p.price).toFixed(2)}
                           </Typography>
                         </Box>
-                      }
-                      sx={{ width: '100%', m: 0 }}
-                    />
-                  </Card>
-                ))}
-              </RadioGroup>
-            </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.25 }}>
-              <Button onClick={() => setPlanDialogOpen(false)} disabled={isUpgrading} sx={{ textTransform: 'none' }}>
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleConfirmPlanChange}
-                disabled={isUpgrading || !selectedPlanId}
-                startIcon={isUpgrading && <CircularProgress size={18} color="inherit" />}
-                sx={{ textTransform: 'none', fontWeight: 600 }}
-              >
-                {isUpgrading ? 'Updating...' : subscription?.plan ? 'Confirm Upgrade' : 'Assign Plan'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+                        <Typography variant="body2" color="text.secondary">
+                          {p.durationInDays} Days • Up to {p.maxStaff} Staff • Up to {p.maxAppointments} Appointments
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{ width: '100%', m: 0 }}
+                  />
+                </Card>
+              ))}
+            </RadioGroup>
+          </AppModal>
 
           {/* Modal: Renew Confirmation */}
-          <Dialog open={renewDialogOpen} onClose={() => !isRenewing && setRenewDialogOpen(false)} maxWidth="xs" fullWidth>
-            <DialogTitle sx={{ fontWeight: 700 }}>
-              Renew Subscription?
-            </DialogTitle>
-            <DialogContent>
-              <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
-                Renewing will extend your current <strong>{subscription?.plan?.name}</strong> plan for another{' '}
-                <strong>{subscription?.plan?.durationInDays} days</strong> at{' '}
-                <strong>₹{Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
-              </Typography>
-            </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.25 }}>
-              <Button onClick={() => setRenewDialogOpen(false)} disabled={isRenewing} sx={{ textTransform: 'none' }}>
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleConfirmRenew}
-                disabled={isRenewing}
-                startIcon={isRenewing && <CircularProgress size={18} color="inherit" />}
-                sx={{ textTransform: 'none', fontWeight: 600 }}
-              >
-                {isRenewing ? 'Renewing...' : 'Confirm Renewal'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <AppModal
+            open={renewDialogOpen}
+            onClose={() => !isRenewing && setRenewDialogOpen(false)}
+            maxWidth="xs"
+            title="Renew Subscription?"
+            disableClose={isRenewing}
+            actions={
+              <>
+                <Button onClick={() => setRenewDialogOpen(false)} disabled={isRenewing} sx={{ textTransform: 'none' }}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleConfirmRenew}
+                  disabled={isRenewing}
+                  startIcon={isRenewing && <CircularProgress size={18} color="inherit" />}
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
+                  {isRenewing ? 'Renewing...' : 'Confirm Renewal'}
+                </Button>
+              </>
+            }
+          >
+            <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
+              Renewing will extend your current <strong>{subscription?.plan?.name}</strong> plan for another{' '}
+              <strong>{subscription?.plan?.durationInDays} days</strong> at{' '}
+              <strong>₹{Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
+            </Typography>
+          </AppModal>
         </>
       )}
     </PageContainer>

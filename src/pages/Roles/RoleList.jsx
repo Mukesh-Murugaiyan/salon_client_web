@@ -33,6 +33,7 @@ import {
   People as PeopleIcon,
 } from '@mui/icons-material';
 import PageContainer from '../../components/layout/PageContainer';
+import AppModal from '../../components/common/AppModal';
 import LoadingState from '../../components/common/LoadingState';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -196,8 +197,8 @@ const RoleList = () => {
         />
       ) : (
         <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 700 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 240px)' }}>
+            <Table stickyHeader sx={{ minWidth: 700 }}>
               <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Role Name</TableCell>
@@ -343,68 +344,20 @@ const RoleList = () => {
       )}
 
       {/* Create / Edit Role Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-            {editingRole ? 'Edit Role' : 'Create New Role'}
-          </DialogTitle>
-          <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
-            {dialogError && <Alert severity="error">{dialogError}</Alert>}
-
-            <TextField
-              label="Role Name"
-              required
-              fullWidth
-              value={formData.name}
-              onChange={(e) => {
-                const name = e.target.value;
-                setFormData({
-                  ...formData,
-                  name,
-                  code: !editingRole ? name.trim().replace(/\s+/g, '_').toUpperCase() : formData.code,
-                });
-              }}
-              placeholder="e.g. Front Desk Specialist"
-            />
-
-            <TextField
-              label="Role Code"
-              required
-              disabled={!!editingRole}
-              fullWidth
-              value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-              placeholder="e.g. RECEPTIONIST"
-              helperText={!editingRole ? 'Unique uppercase identifier for system reference' : undefined}
-            />
-
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              fullWidth
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Responsibilities, scope and department context..."
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={formData.isActive ? 'Role Active' : 'Role Inactive'}
-            />
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
+      <AppModal
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        title={editingRole ? 'Edit Role' : 'Create New Role'}
+        disableClose={isSubmitting}
+        actions={
+          <>
             <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
               Cancel
             </Button>
             <Button
               type="submit"
+              form="role-form"
               variant="contained"
               disabled={isSubmitting}
               sx={{
@@ -416,9 +369,61 @@ const RoleList = () => {
             >
               {isSubmitting ? <CircularProgress size={22} color="inherit" /> : editingRole ? 'Update Role' : 'Create Role'}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box component="form" id="role-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          {dialogError && <Alert severity="error">{dialogError}</Alert>}
+
+          <TextField
+            label="Role Name"
+            required
+            fullWidth
+            value={formData.name}
+            onChange={(e) => {
+              const name = e.target.value;
+              setFormData({
+                ...formData,
+                name,
+                code: !editingRole ? name.trim().replace(/\s+/g, '_').toUpperCase() : formData.code,
+              });
+            }}
+            placeholder="e.g. Front Desk Specialist"
+          />
+
+          <TextField
+            label="Role Code"
+            required
+            disabled={!!editingRole}
+            fullWidth
+            value={formData.code}
+            onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+            placeholder="e.g. RECEPTIONIST"
+            helperText={!editingRole ? 'Unique uppercase identifier for system reference' : undefined}
+          />
+
+          <TextField
+            label="Description"
+            multiline
+            rows={3}
+            fullWidth
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Responsibilities, scope and department context..."
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isActive ? 'Role Active' : 'Role Inactive'}
+          />
+        </Box>
+      </AppModal>
     </PageContainer>
   );
 };

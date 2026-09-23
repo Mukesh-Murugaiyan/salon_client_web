@@ -13,10 +13,6 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   FormControlLabel,
   Switch,
@@ -37,6 +33,8 @@ import PageContainer from '../components/layout/PageContainer';
 import LoadingState from '../components/common/LoadingState';
 import ErrorState from '../components/common/ErrorState';
 import EmptyState from '../components/common/EmptyState';
+import AppModal from '../components/common/AppModal';
+import DebouncedSearchInput from '../components/common/DebouncedSearchInput';
 import { usePermission } from '../hooks/usePermission';
 import salonsApi from '../api/salonsApi';
 import { plansApi } from '../api/plansApi';
@@ -344,20 +342,13 @@ const Salons = () => {
 
       {/* Search Bar */}
       <Box sx={{ mb: { xs: 2, sm: 2.5 }, display: 'flex', gap: 1.5 }}>
-        <TextField
-          placeholder="Search by name, code, or email..."
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: { xs: '100%', sm: 340 }, backgroundColor: '#ffffff' }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" sx={{ color: '#94a3b8' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box sx={{ width: { xs: '100%', sm: 340 } }}>
+          <DebouncedSearchInput
+            placeholder="Search by name, code, or email..."
+            value={searchQuery}
+            onSearchChange={(val) => setSearchQuery(val)}
+          />
+        </Box>
       </Box>
 
       {isLoading ? (
@@ -373,8 +364,8 @@ const Salons = () => {
         />
       ) : (
         <Card sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-          <TableContainer sx={{ overflowX: 'auto', width: '100%' }}>
-            <Table sx={{ minWidth: 700 }}>
+          <TableContainer sx={{ overflowX: 'auto', width: '100%', maxHeight: 'calc(100vh - 280px)' }}>
+            <Table stickyHeader sx={{ minWidth: 700 }}>
               <TableHead sx={{ backgroundColor: '#f8fafc' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: '#475569' }}>Salon Name</TableCell>
@@ -454,12 +445,35 @@ const Salons = () => {
       )}
 
       {/* Create / Edit Salon Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <form onSubmit={handleSubmit}>
-          <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-            {editingSalon ? 'Edit Salon' : 'Provision New Salon Tenant'}
-          </DialogTitle>
-          <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2 }}>
+      <AppModal
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        title={editingSalon ? 'Edit Salon' : 'Provision New Salon Tenant'}
+        disableClose={isSubmitting}
+        actions={
+          <>
+            <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="salon-form"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 3,
+              }}
+            >
+              {isSubmitting ? <CircularProgress size={22} color="inherit" /> : editingSalon ? 'Save Changes' : 'Provision Salon'}
+            </Button>
+          </>
+        }
+      >
+        <Box component="form" id="salon-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {dialogError && <Alert severity="error">{dialogError}</Alert>}
 
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -666,105 +680,89 @@ const Salons = () => {
                 </Box>
               </Box>
             )}
-          </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.25 }}>
-            <Button onClick={handleCloseDialog} disabled={isSubmitting} color="inherit">
+        </Box>
+      </AppModal>
+
+      {/* Assign / Change Plan Modal */}
+      <AppModal
+        open={planDialogOpen}
+        onClose={() => !isAssigningPlan && setPlanDialogOpen(false)}
+        maxWidth="sm"
+        title={editingSalon?.currentPlanId ? 'Change Subscription Plan' : 'Assign Subscription Plan'}
+        disableClose={isAssigningPlan}
+        actions={
+          <>
+            <Button onClick={() => setPlanDialogOpen(false)} disabled={isAssigningPlan} color="inherit">
               Cancel
             </Button>
             <Button
-              type="submit"
               variant="contained"
-              disabled={isSubmitting}
-              sx={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                fontWeight: 600,
-                textTransform: 'none',
-                px: 3,
-              }}
+              color="primary"
+              onClick={handleConfirmPlanChange}
+              disabled={isAssigningPlan || !selectedPlanId || !planStartDate}
+              startIcon={isAssigningPlan && <CircularProgress size={18} color="inherit" />}
             >
-              {isSubmitting ? <CircularProgress size={22} color="inherit" /> : editingSalon ? 'Save Changes' : 'Provision Salon'}
+              {isAssigningPlan ? 'Processing...' : 'Assign Plan'}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </>
+        }
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {planDialogError && <Alert severity="error">{planDialogError}</Alert>}
 
-      {/* Assign / Change Plan Modal */}
-      <Dialog open={planDialogOpen} onClose={() => !isAssigningPlan && setPlanDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          {editingSalon?.currentPlanId ? 'Change Subscription Plan' : 'Assign Subscription Plan'}
-        </DialogTitle>
-        <DialogContent dividers>
-          {planDialogError && <Alert severity="error" sx={{ mb: 2 }}>{planDialogError}</Alert>}
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              select
-              label="Plan *"
-              value={selectedPlanId}
-              onChange={(e) => setSelectedPlanId(e.target.value)}
-              SelectProps={{ native: true }}
-              fullWidth
-            >
-              <option value="" disabled>Select Plan ▼</option>
-              {availablePlans.map((p) => (
-                <option key={p.id || p._id} value={p.id || p._id}>
-                  {p.name} - ₹{Number(p.price).toFixed(2)} / {p.durationInDays} Days
-                </option>
-              ))}
-            </TextField>
-
-            <TextField
-              type="date"
-              label="Start Date *"
-              value={planStartDate}
-              onChange={(e) => setPlanStartDate(e.target.value)}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
-
-            {/* Live Preview */}
-            {selectedPlanId && (
-              <Box sx={{ mt: 1, p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Plan Preview</Typography>
-                {(() => {
-                  const p = availablePlans.find(plan => (plan.id || plan._id) === selectedPlanId);
-                  if (!p) return null;
-
-                  const sDate = planStartDate ? new Date(planStartDate) : new Date();
-                  let eDateStr = '—';
-                  if (!isNaN(sDate.getTime())) {
-                    const eDate = new Date(sDate.getTime() + p.durationInDays * 24 * 60 * 60 * 1000);
-                    eDateStr = eDate.toLocaleDateString();
-                  }
-
-                  return (
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
-                      <Typography variant="body2"><strong>Plan:</strong> {p.name}</Typography>
-                      <Typography variant="body2"><strong>Price:</strong> ₹{Number(p.price).toFixed(2)}</Typography>
-                      <Typography variant="body2"><strong>Duration:</strong> {p.durationInDays} Days</Typography>
-                      <Typography variant="body2"><strong>End Date:</strong> {eDateStr}</Typography>
-                    </Box>
-                  );
-                })()}
-              </Box>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.25 }}>
-          <Button onClick={() => setPlanDialogOpen(false)} disabled={isAssigningPlan} color="inherit">
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmPlanChange}
-            disabled={isAssigningPlan || !selectedPlanId || !planStartDate}
-            startIcon={isAssigningPlan && <CircularProgress size={18} color="inherit" />}
+          <TextField
+            select
+            label="Plan *"
+            value={selectedPlanId}
+            onChange={(e) => setSelectedPlanId(e.target.value)}
+            SelectProps={{ native: true }}
+            fullWidth
           >
-            {isAssigningPlan ? 'Processing...' : 'Assign Plan'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <option value="" disabled>Select Plan ▼</option>
+            {availablePlans.map((p) => (
+              <option key={p.id || p._id} value={p.id || p._id}>
+                {p.name} - ₹{Number(p.price).toFixed(2)} / {p.durationInDays} Days
+              </option>
+            ))}
+          </TextField>
+
+          <TextField
+            type="date"
+            label="Start Date *"
+            value={planStartDate}
+            onChange={(e) => setPlanStartDate(e.target.value)}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+          />
+
+          {/* Live Preview */}
+          {selectedPlanId && (
+            <Box sx={{ mt: 1, p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Plan Preview</Typography>
+              {(() => {
+                const p = availablePlans.find(plan => (plan.id || plan._id) === selectedPlanId);
+                if (!p) return null;
+
+                const sDate = planStartDate ? new Date(planStartDate) : new Date();
+                let eDateStr = '—';
+                if (!isNaN(sDate.getTime())) {
+                  const eDate = new Date(sDate.getTime() + p.durationInDays * 24 * 60 * 60 * 1000);
+                  eDateStr = eDate.toLocaleDateString();
+                }
+
+                return (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                    <Typography variant="body2"><strong>Plan:</strong> {p.name}</Typography>
+                    <Typography variant="body2"><strong>Price:</strong> ₹{Number(p.price).toFixed(2)}</Typography>
+                    <Typography variant="body2"><strong>Duration:</strong> {p.durationInDays} Days</Typography>
+                    <Typography variant="body2"><strong>End Date:</strong> {eDateStr}</Typography>
+                  </Box>
+                );
+              })()}
+            </Box>
+          )}
+        </Box>
+      </AppModal>
     </PageContainer>
   );
 };
