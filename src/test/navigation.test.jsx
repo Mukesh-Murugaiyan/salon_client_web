@@ -5,6 +5,8 @@ import { NAVIGATION_ITEMS } from '../config/navigation';
 import { hasPermission } from '../utils/permission.utils';
 import { getDefaultRouteForRole } from '../utils/route.utils';
 
+import { getDefaultDashboardRoute } from '../routes/navigation';
+
 describe('Dynamic Permission-Driven Navigation Tests', () => {
   it('RECEPTIONIST navigation strictly excludes Plans, Salons, and Subscription', () => {
     const receptionistUser = {
@@ -70,5 +72,43 @@ describe('Dynamic Permission-Driven Navigation Tests', () => {
     expect(getDefaultRouteForRole(ROLES.OWNER.value)).toBe(ROUTES.DASHBOARD.value);
     expect(getDefaultRouteForRole(ROLES.RECEPTIONIST.value)).toBe(ROUTES.DASHBOARD.value);
     expect(getDefaultRouteForRole('UNKNOWN_ROLE')).toBe(ROUTES.LOGIN.value);
+  });
+
+  it('navigates to next available permitted screen when dashboard:view is disabled', () => {
+    // User with dashboard:view disabled, but appointments and clients enabled
+    const userWithoutDashboard = {
+      role: 'RECEPTIONIST',
+      permissions: ['clients:view', 'appointments:view'],
+    };
+    // In NAVIGATION_ITEMS order: clients appears before appointments
+    expect(getDefaultDashboardRoute(userWithoutDashboard)).toBe(ROUTES.CLIENTS.value);
+
+    // User with only attendance:view enabled
+    const userWithOnlyAttendance = {
+      role: 'STAFF',
+      permissions: ['attendance:view'],
+    };
+    expect(getDefaultDashboardRoute(userWithOnlyAttendance)).toBe(ROUTES.ATTENDANCE.value);
+
+    // User with only appointments:view enabled
+    const userWithOnlyAppointments = {
+      role: 'STAFF',
+      permissions: ['appointments:view'],
+    };
+    expect(getDefaultDashboardRoute(userWithOnlyAppointments)).toBe(ROUTES.APPOINTMENTS.value);
+
+    // User with dashboard:view enabled navigates directly to dashboard
+    const userWithDashboard = {
+      role: 'OWNER',
+      permissions: ['dashboard:view', 'appointments:view'],
+    };
+    expect(getDefaultDashboardRoute(userWithDashboard)).toBe(ROUTES.DASHBOARD.value);
+
+    // User with no permissions at all falls back to forbidden route (403)
+    const userWithNoPermissions = {
+      role: 'GUEST',
+      permissions: [],
+    };
+    expect(getDefaultDashboardRoute(userWithNoPermissions)).toBe(ROUTES.FORBIDDEN.value);
   });
 });

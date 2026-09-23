@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from '../constants/routes';
+import { getDefaultDashboardRoute } from '../routes/navigation';
 import { Validation } from '../utils/Validation';
 import { StringUtils } from '../utils/StringUtils';
 import { AppConfig } from '../config/AppConfig';
@@ -37,9 +38,13 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // If already authenticated, redirect to dashboard or intended route
+  // If already authenticated, redirect to next available screen or intended route
   if (isAuthenticated && user) {
-    const from = location.state?.from?.pathname || ROUTES.DASHBOARD.value;
+    const defaultRoute = getDefaultDashboardRoute(user);
+    const requestedRoute = location.state?.from?.pathname;
+    const from = (requestedRoute && requestedRoute !== ROUTES.DASHBOARD.value)
+      ? requestedRoute
+      : defaultRoute;
     return <Navigate to={from} replace />;
   }
 
@@ -70,8 +75,13 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      await login(email.trim(), password);
-      const targetRoute = location.state?.from?.pathname || ROUTES.DASHBOARD.value;
+      const loggedInUser = await login(email.trim(), password);
+      const userProfile = loggedInUser || user;
+      const defaultRoute = getDefaultDashboardRoute(userProfile);
+      const requestedRoute = location.state?.from?.pathname;
+      const targetRoute = (requestedRoute && requestedRoute !== ROUTES.DASHBOARD.value)
+        ? requestedRoute
+        : defaultRoute;
       navigate(targetRoute, { replace: true });
     } catch (err) {
       const apiMessage =

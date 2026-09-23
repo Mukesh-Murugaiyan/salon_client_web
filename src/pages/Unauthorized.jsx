@@ -10,7 +10,7 @@ const Unauthorized = () => {
   const navigate = useNavigate();
 
   const handleReturn = () => {
-    const route = getDefaultDashboardRoute(user?.role);
+    const route = getDefaultDashboardRoute(user);
     navigate(route, { replace: true });
   };
 
@@ -53,7 +53,7 @@ const Unauthorized = () => {
             onClick={handleReturn}
             sx={{ borderRadius: 2 }}
           >
-            Return to Dashboard
+            Return to Home
           </Button>
         </CardContent>
       </Card>
