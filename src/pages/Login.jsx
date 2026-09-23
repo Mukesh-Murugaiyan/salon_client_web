@@ -89,9 +89,9 @@ const Login = () => {
     }
   };
 
-  const handleFillSeedAdmin = () => {
-    setEmail('superadmin@salon.com');
-    setPassword('Admin@123');
+  const handleFillCredentials = (testEmail, testPassword) => {
+    setEmail(testEmail);
+    setPassword(testPassword);
     setErrorMessage('');
     setFieldErrors({});
   };
@@ -242,17 +242,17 @@ const Login = () => {
 
           <Divider sx={{ my: 2 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              QUICK SEED ACCESS
+              EVALUATOR QUICK ACCESS (PASSWORD01*)
             </Typography>
           </Divider>
 
-          {/* Quick seed admin fill button */}
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          {/* Quick test credentials buttons */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Chip
-              label="Fill Seed Admin (superadmin@salon.com)"
+              label="Super Admin (superadmin@salon.com)"
               variant="outlined"
               size="small"
-              onClick={handleFillSeedAdmin}
+              onClick={() => handleFillCredentials('superadmin@salon.com', 'Password01*')}
               disabled={isSubmitting}
               sx={{
                 cursor: 'pointer',
@@ -262,6 +262,38 @@ const Login = () => {
                 '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
               }}
             />
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Chip
+                label="Owner (ownera@salon.com)"
+                variant="outlined"
+                size="small"
+                onClick={() => handleFillCredentials('ownera@salon.com', 'Password01*')}
+                disabled={isSubmitting}
+                sx={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  borderColor: '#cbd5e1',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
+                }}
+              />
+              <Chip
+                label="Receptionist (receptionista@salon.com)"
+                variant="outlined"
+                size="small"
+                onClick={() => handleFillCredentials('receptionista@salon.com', 'Password01*')}
+                disabled={isSubmitting}
+                sx={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  borderColor: '#cbd5e1',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  '&:hover': { backgroundColor: '#f1f5f9', borderColor: '#6366f1', color: '#6366f1' },
+                }}
+              />
+            </Box>
           </Box>
         </CardContent>
       </Card>

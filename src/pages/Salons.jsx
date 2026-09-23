@@ -63,7 +63,6 @@ const Salons = () => {
   });
   const [dialogError, setDialogError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
   const [actionSuccess, setActionSuccess] = useState('');
 
   // Subscription Modals State
@@ -146,40 +145,13 @@ const Salons = () => {
     setDialogOpen(false);
     setEditingSalon(null);
     setDialogError('');
-    setIsLocating(false);
   };
 
-  const handleUseCurrentLocation = async () => {
-    setDialogError('');
-    setIsLocating(true);
-
-    const tryIpFallback = async () => {
-      try {
-        const res = await fetch('https://ipwho.is/');
-        const data = await res.json();
-        if (data && data.success !== false && data.latitude && data.longitude) {
-          setFormData((prev) => ({
-            ...prev,
-            latitude: String(Number(data.latitude).toFixed(6)),
-            longitude: String(Number(data.longitude).toFixed(6)),
-          }));
-          return true;
-        }
-      } catch (e) {
-        console.warn('IP fallback failed:', e);
-      }
-      return false;
-    };
-
+  const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      const ok = await tryIpFallback();
-      setIsLocating(false);
-      if (!ok) {
-        setDialogError('Geolocation is not supported by your browser. Please enter coordinates manually.');
-      }
+      setDialogError('Geolocation is not supported by your browser.');
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setFormData((prev) => ({
@@ -187,21 +159,11 @@ const Salons = () => {
           latitude: String(pos.coords.latitude.toFixed(6)),
           longitude: String(pos.coords.longitude.toFixed(6)),
         }));
-        setIsLocating(false);
       },
-      async (err) => {
-        console.warn('Browser geolocation failed (' + err.message + '), trying IP fallback...');
-        const ok = await tryIpFallback();
-        setIsLocating(false);
-        if (!ok) {
-          setDialogError('Failed to retrieve current location: ' + err.message + '. Please enter latitude and longitude manually.');
-        }
+      (err) => {
+        setDialogError('Failed to retrieve current location: ' + err.message);
       },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 300000,
-      }
+      { enableHighAccuracy: true }
     );
   };
   console.log("formData------", formData)
@@ -512,213 +474,203 @@ const Salons = () => {
         }
       >
         <Box component="form" id="salon-form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            {dialogError && <Alert severity="error">{dialogError}</Alert>}
+          {dialogError && <Alert severity="error">{dialogError}</Alert>}
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label="Salon Name"
-                required
-                fullWidth
-                value={formData.name}
-                onChange={handleNameChange}
-                placeholder="e.g. Elegance Studio"
-              />
-              <TextField
-                label="Salon Code"
-                required
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                placeholder="e.g. ELEGANCE"
-                helperText="Must be unique. Used for quick reference."
-              />
-            </Box>
-
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
-              label="Contact Email"
-              type="email"
+              label="Salon Name"
+              required
               fullWidth
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="hello@elegance.com"
+              value={formData.name}
+              onChange={handleNameChange}
+              placeholder="e.g. Elegance Studio"
             />
-
             <TextField
-              label="Contact Phone"
-              fullWidth
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+1 (555) 000-0000"
+              label="Salon Code"
+              required
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+              placeholder="e.g. ELEGANCE"
+              helperText="Must be unique. Used for quick reference."
             />
+          </Box>
 
-            <TextField
-              label="Address"
-              fullWidth
-              multiline
-              rows={2}
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              placeholder="123 Salon Avenue, Suite 100"
-            />
+          <TextField
+            label="Contact Email"
+            type="email"
+            fullWidth
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="hello@elegance.com"
+          />
 
-            <Box sx={{ p: 2, borderRadius: 2, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
-                  Salon Geo-Fence Settings
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.8125rem' }}>
-                  Configure the physical GPS coordinates and allowable radius for this salon. Check-in requests beyond this radius are automatically rejected by the server Haversine formula.
-                </Typography>
-              </Box>
+          <TextField
+            label="Contact Phone"
+            fullWidth
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            placeholder="+1 (555) 000-0000"
+          />
 
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={isLocating}
-                startIcon={isLocating ? <CircularProgress size={16} color="inherit" /> : <MyLocationIcon />}
-                onClick={handleUseCurrentLocation}
-                sx={{ alignSelf: 'flex-start', textTransform: 'none', borderRadius: '8px', color: '#6366f1', borderColor: '#cbd5e1' }}
-              >
-                {isLocating ? 'Detecting Location...' : 'Use My Current Device Location'}
-              </Button>
+          <TextField
+            label="Address"
+            fullWidth
+            multiline
+            rows={2}
+            value={formData.address}
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            placeholder="123 Salon Avenue, Suite 100"
+          />
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                <TextField
-                  label="Latitude (-90 to 90)"
-                  required
-                  fullWidth
-                  value={formData.latitude}
-                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                  inputProps={{ inputMode: 'decimal' }}
-                  placeholder="e.g. 37.7749"
-                />
-                <TextField
-                  label="Longitude (-180 to 180)"
-                  required
-                  fullWidth
-                  value={formData.longitude}
-                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                  inputProps={{ inputMode: 'decimal' }}
-                  placeholder="e.g. -122.4194"
-                />
-              </Box>
-
-              <TextField
-                label="Allowed Radius (Meters)"
-                type="number"
-                required
-                fullWidth
-                value={formData.allowedRadiusInMeters}
-                onChange={(e) => setFormData({ ...formData, allowedRadiusInMeters: e.target.value })}
-                helperText="Maximum allowed distance between employee device and salon coordinates (e.g. 100 or 200m)."
-                inputProps={{ min: 1 }}
-              />
-            </Box>
+          <Box sx={{ p: 2, borderRadius: 2, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MyLocationIcon />}
+              onClick={handleUseCurrentLocation}
+              sx={{ alignSelf: 'flex-start', textTransform: 'none', borderRadius: '8px', color: '#6366f1', borderColor: '#cbd5e1' }}
+            >
+              Use My Current Device Location
+            </Button>
 
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
               <TextField
-                label="Opening Time"
-                type="time"
+                label="Latitude (-90 to 90)"
                 required
                 fullWidth
-                value={formData.openingTime}
-                onChange={(e) => setFormData({ ...formData, openingTime: e.target.value })}
-                helperText="Salon opens at this time"
-                InputLabelProps={{ shrink: true }}
-                inputProps={{ step: 300 }}
+                value={formData.latitude}
+                onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                inputProps={{ inputMode: 'decimal' }}
+                placeholder="e.g. 37.7749"
               />
               <TextField
-                label="Closing Time"
-                type="time"
+                label="Longitude (-180 to 180)"
                 required
                 fullWidth
-                value={formData.closingTime}
-                onChange={(e) => setFormData({ ...formData, closingTime: e.target.value })}
-                helperText="Salon closes at this time"
-                InputLabelProps={{ shrink: true }}
-                inputProps={{ step: 300 }}
+                value={formData.longitude}
+                onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                inputProps={{ inputMode: 'decimal' }}
+                placeholder="e.g. -122.4194"
               />
             </Box>
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={formData.isActive ? 'Tenant Active' : 'Tenant Inactive'}
+            <TextField
+              label="Allowed Radius (Meters)"
+              type="number"
+              required
+              fullWidth
+              value={formData.allowedRadiusInMeters}
+              onChange={(e) => setFormData({ ...formData, allowedRadiusInMeters: e.target.value })}
+              helperText="Maximum allowed distance between employee device and salon coordinates (e.g. 100 or 200m)."
+              inputProps={{ min: 1 }}
             />
+          </Box>
 
-            {editingSalon && (
-              <Box sx={{ mt: 2, p: 2, borderRadius: 2, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#475569' }}>
-                  Subscription Context
-                </Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Current Plan</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {editingSalon.currentPlanId?.name || 'NOT ASSIGNED'}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Status</Typography>
-                    <Typography variant="body2">
-                      <Chip
-                        size="small"
-                        label={editingSalon.subscriptionStatus || 'EXPIRED'}
-                        color={editingSalon.subscriptionStatus === 'ACTIVE' ? 'success' : 'error'}
-                        sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                      />
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Start Date</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {editingSalon.subscriptionStartDate ? new Date(editingSalon.subscriptionStartDate).toLocaleDateString() : '—'}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Expiry Date</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {editingSalon.subscriptionEndDate ? new Date(editingSalon.subscriptionEndDate).toLocaleDateString() : '—'}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Days Remaining</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: editingSalon.subscriptionStatus === 'ACTIVE' ? '#10b981' : '#ef4444' }}>
-                      {editingSalon.subscriptionEndDate && editingSalon.subscriptionStatus === 'ACTIVE'
-                        ? Math.max(0, Math.ceil((new Date(editingSalon.subscriptionEndDate) - new Date()) / (1000 * 60 * 60 * 24)))
-                        : 0} days
-                    </Typography>
-                  </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+            <TextField
+              label="Opening Time"
+              type="time"
+              required
+              fullWidth
+              value={formData.openingTime}
+              onChange={(e) => setFormData({ ...formData, openingTime: e.target.value })}
+              helperText="Salon opens at this time"
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ step: 300 }}
+            />
+            <TextField
+              label="Closing Time"
+              type="time"
+              required
+              fullWidth
+              value={formData.closingTime}
+              onChange={(e) => setFormData({ ...formData, closingTime: e.target.value })}
+              helperText="Salon closes at this time"
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ step: 300 }}
+            />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                color="primary"
+              />
+            }
+            label={formData.isActive ? 'Tenant Active' : 'Tenant Inactive'}
+          />
+
+          {editingSalon && (
+            <Box sx={{ mt: 2, p: 2, borderRadius: 2, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#475569' }}>
+                Subscription Context
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Current Plan</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {editingSalon.currentPlanId?.name || 'NOT ASSIGNED'}
+                  </Typography>
                 </Box>
-
-                <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                  {!editingSalon.currentPlanId && (
-                    <Button variant="outlined" size="small" onClick={handleOpenPlanModal}>
-                      Assign Plan
-                    </Button>
-                  )}
-                  {editingSalon.currentPlanId && (
-                    <Button variant="outlined" size="small" onClick={handleOpenPlanModal}>
-                      Change Plan
-                    </Button>
-                  )}
-                  {editingSalon.currentPlanId && editingSalon.subscriptionStatus !== 'ACTIVE' && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleRenewPlan}>
-                      Renew Plan
-                    </Button>
-                  )}
-                  {editingSalon.currentPlanId && (
-                    <Button variant="outlined" color="error" size="small" onClick={handleRemovePlan}>
-                      Remove Plan
-                    </Button>
-                  )}
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Status</Typography>
+                  <Typography variant="body2">
+                    <Chip
+                      size="small"
+                      label={editingSalon.subscriptionStatus || 'EXPIRED'}
+                      color={editingSalon.subscriptionStatus === 'ACTIVE' ? 'success' : 'error'}
+                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
+                    />
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Start Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {editingSalon.subscriptionStartDate ? new Date(editingSalon.subscriptionStartDate).toLocaleDateString() : '—'}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Expiry Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {editingSalon.subscriptionEndDate ? new Date(editingSalon.subscriptionEndDate).toLocaleDateString() : '—'}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Days Remaining</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: editingSalon.subscriptionStatus === 'ACTIVE' ? '#10b981' : '#ef4444' }}>
+                    {editingSalon.subscriptionEndDate && editingSalon.subscriptionStatus === 'ACTIVE'
+                      ? Math.max(0, Math.ceil((new Date(editingSalon.subscriptionEndDate) - new Date()) / (1000 * 60 * 60 * 24)))
+                      : 0} days
+                  </Typography>
                 </Box>
               </Box>
-            )}
+
+              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                {!editingSalon.currentPlanId && (
+                  <Button variant="outlined" size="small" onClick={handleOpenPlanModal}>
+                    Assign Plan
+                  </Button>
+                )}
+                {editingSalon.currentPlanId && (
+                  <Button variant="outlined" size="small" onClick={handleOpenPlanModal}>
+                    Change Plan
+                  </Button>
+                )}
+                {editingSalon.currentPlanId && editingSalon.subscriptionStatus !== 'ACTIVE' && (
+                  <Button variant="contained" color="primary" size="small" onClick={handleRenewPlan}>
+                    Renew Plan
+                  </Button>
+                )}
+                {editingSalon.currentPlanId && (
+                  <Button variant="outlined" color="error" size="small" onClick={handleRemovePlan}>
+                    Remove Plan
+                  </Button>
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
       </AppModal>
 

@@ -132,10 +132,12 @@ UI Navigation & Page Access
 
 ---
 
-## 4. Initial Seed Credentials
+## 4. Evaluator Test Credentials
+ 
+| Role | Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | `superadmin@salon.com` | `Password01*` | Full system administration, salons, plans, roles & permissions |
+| **Owner** | `ownera@salon.com` | `Password01*` | Salon management, staff, clients, services, subscriptions |
+| **Receptionist** | `receptionista@salon.com` | `Password01*` | Front-desk scheduling, attendance check-in, appointments |
 
-To log in immediately after clean database seeding:
-- **Email**: `superadmin@salon.com`
-- **Password**: `Admin@123`
-- **Assigned Role**: `Super Admin` (Company: `Demo Company`)
-- **Granted Permissions**: Full platform permissions (`users:*`, `roles:*`, `appointments:*`, `clients:*`, `dashboard:*`, etc.)
+*(Note: The login page includes quick-fill chips for all three accounts).*
