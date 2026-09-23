@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button } from '@mui/material';
 import { GppBad as ForbiddenIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
-import { getDefaultRouteForRole } from '../../utils/route.utils';
+import { getDefaultDashboardRoute } from '../../routes/navigation';
 import { getRoleLabel } from '../../utils/role.utils';
 
 /**
@@ -14,7 +14,7 @@ const Forbidden = () => {
   const navigate = useNavigate();
 
   const handleReturn = () => {
-    const route = getDefaultRouteForRole(user?.role);
+    const route = getDefaultDashboardRoute(user);
     navigate(route, { replace: true });
   };
 
@@ -64,7 +64,7 @@ const Forbidden = () => {
             onClick={handleReturn}
             sx={{ borderRadius: 2, px: 3, py: 1 }}
           >
-            Back to Dashboard
+            Back to Home
           </Button>
         </CardContent>
       </Card>

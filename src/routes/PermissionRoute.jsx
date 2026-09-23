@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { hasPermission, can, hasAnyPermission } from '../utils/permission.utils';
 import { ROUTES } from '../constants/routes';
+import { getDefaultDashboardRoute } from './navigation';
 
 /**
  * Dynamic Permission-Based Route Guard
@@ -36,6 +37,14 @@ const PermissionRoute = ({ requiredPermission, module: moduleName, action: actio
   }
 
   if (!isAllowed) {
+    // If the blocked route is the root dashboard route and dashboard:view is disabled,
+    // automatically forward the user to their next available permitted screen instead of 403
+    if (requiredPermission === 'dashboard:view') {
+      const nextRoute = getDefaultDashboardRoute(user);
+      if (nextRoute && nextRoute !== ROUTES.DASHBOARD.value && nextRoute !== ROUTES.FORBIDDEN.value) {
+        return <Navigate to={nextRoute} replace />;
+      }
+    }
     return <Navigate to={ROUTES.FORBIDDEN.value} replace />;
   }
 
@@ -43,3 +52,4 @@ const PermissionRoute = ({ requiredPermission, module: moduleName, action: actio
 };
 
 export default PermissionRoute;
+

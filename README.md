@@ -274,7 +274,7 @@ Dynamic users are seeded in the database. You can click the **quick-fill chips**
 
 ## Automated Testing Suite
 
-The application is thoroughly verified using **Vitest** and **React Testing Library** (15 tests across 4 test suites):
+The application is thoroughly verified using **Vitest** and **React Testing Library** (16 tests across 4 test suites):
 
 ```bash
 npm test
@@ -293,11 +293,12 @@ npm test
   - Verifies local session cleanup on logout
   - Handles parsing anomalies securely
 
-✓ src/test/navigation.test.jsx (4 tests)
+✓ src/test/navigation.test.jsx (5 tests)
   - Renders authorized navigation links according to permissions
   - Excludes forbidden menu items dynamically
   - Preserves public access paths
   - Handles super admin role overrides
+  - Resolves next available permitted screen when dashboard:view is disabled
 
 ✓ src/test/Login.test.jsx (5 tests)
   - Renders application branding, email, password inputs, and submit button
