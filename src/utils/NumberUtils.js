@@ -5,18 +5,18 @@
 export class NumberUtils {
   /**
    * Formats a monetary amount into a localized currency string.
-   * Defaults to $ or customizable.
+   * Defaults to ₹ or customizable.
    * @param {number|string} [amount]
-   * @param {string} [symbol='$']
+   * @param {string} [symbol='₹']
    * @param {number} [fractionDigits=2]
    * @returns {string}
    */
-  static formatCurrency(amount, symbol = '$', fractionDigits = 2) {
+  static formatCurrency(amount, symbol = '₹', fractionDigits = 2) {
     if (amount === undefined || amount === null || amount === '') return `${symbol}0.00`;
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     if (isNaN(num)) return `${symbol}0.00`;
 
-    const formatted = num.toLocaleString(undefined, {
+    const formatted = num.toLocaleString('en-IN', {
       minimumFractionDigits: fractionDigits,
       maximumFractionDigits: fractionDigits,
     });

@@ -708,7 +708,7 @@ const Salons = () => {
               <option value="" disabled>Select Plan ▼</option>
               {availablePlans.map((p) => (
                 <option key={p.id || p._id} value={p.id || p._id}>
-                  {p.name} - ${Number(p.price).toFixed(2)} / {p.durationInDays} Days
+                  {p.name} - ₹{Number(p.price).toFixed(2)} / {p.durationInDays} Days
                 </option>
               ))}
             </TextField>
@@ -740,7 +740,7 @@ const Salons = () => {
                   return (
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
                       <Typography variant="body2"><strong>Plan:</strong> {p.name}</Typography>
-                      <Typography variant="body2"><strong>Price:</strong> ${Number(p.price).toFixed(2)}</Typography>
+                      <Typography variant="body2"><strong>Price:</strong> ₹{Number(p.price).toFixed(2)}</Typography>
                       <Typography variant="body2"><strong>Duration:</strong> {p.durationInDays} Days</Typography>
                       <Typography variant="body2"><strong>End Date:</strong> {eDateStr}</Typography>
                     </Box>

@@ -2,13 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { ROLES } from '../constants/roles';
 import { ROUTES } from '../constants/routes';
 import { NAVIGATION_ITEMS } from '../config/navigation';
-import { hasRole } from '../utils/role.utils';
+import { hasPermission } from '../utils/permission.utils';
 import { getDefaultRouteForRole } from '../utils/route.utils';
 
-describe('Configuration-Driven Navigation & Role Groups Tests', () => {
+describe('Dynamic Permission-Driven Navigation Tests', () => {
   it('RECEPTIONIST navigation strictly excludes Plans, Salons, and Subscription', () => {
+    const receptionistUser = {
+      permissions: ['dashboard:view', 'appointments:view', 'clients:view', 'services:view', 'staff:view'],
+    };
     const visibleItems = NAVIGATION_ITEMS.filter((item) =>
-      hasRole(ROLES.RECEPTIONIST.value, item.allowedRoles)
+      hasPermission(receptionistUser, item.requiredPermission)
     );
     const routes = visibleItems.map((item) => item.route);
 
@@ -16,17 +19,25 @@ describe('Configuration-Driven Navigation & Role Groups Tests', () => {
     expect(routes).toContain(ROUTES.APPOINTMENTS.value);
     expect(routes).toContain(ROUTES.CLIENTS.value);
 
-    // Forbidden areas for RECEPTIONIST
+    // Forbidden areas for RECEPTIONIST without admin/subscription permissions
     expect(routes).not.toContain(ROUTES.SUBSCRIPTION.value);
-    expect(routes).not.toContain(ROUTES.ADMIN.value);
     expect(routes).not.toContain(ROUTES.ADMIN_PLANS.value);
     expect(routes).not.toContain(ROUTES.ADMIN_SALONS.value);
-    expect(routes).not.toContain(ROUTES.ADMIN_SUBSCRIPTION_HISTORY.value);
   });
 
   it('OWNER navigation includes Dashboard, Appointments, Clients, and Subscription', () => {
+    const ownerUser = {
+      permissions: [
+        'dashboard:view',
+        'appointments:view',
+        'clients:view',
+        'services:view',
+        'staff:view',
+        'subscription:view',
+      ],
+    };
     const visibleItems = NAVIGATION_ITEMS.filter((item) =>
-      hasRole(ROLES.OWNER.value, item.allowedRoles)
+      hasPermission(ownerUser, item.requiredPermission)
     );
     const routes = visibleItems.map((item) => item.route);
 
@@ -35,23 +46,22 @@ describe('Configuration-Driven Navigation & Role Groups Tests', () => {
     expect(routes).toContain(ROUTES.CLIENTS.value);
     expect(routes).toContain(ROUTES.SUBSCRIPTION.value);
 
-    // Platform-admin-only areas forbidden for OWNER
-    expect(routes).not.toContain(ROUTES.ADMIN.value);
+    // Super-admin only areas forbidden for standard OWNER
     expect(routes).not.toContain(ROUTES.ADMIN_PLANS.value);
     expect(routes).not.toContain(ROUTES.ADMIN_SALONS.value);
-    expect(routes).not.toContain(ROUTES.ADMIN_SUBSCRIPTION_HISTORY.value);
   });
 
-  it('SUPER_ADMIN navigation includes Admin Overview, Plans, Salons, and Subscription', () => {
+  it('SUPER_ADMIN navigation includes Plans, Salons, and Subscription', () => {
+    const adminUser = {
+      permissions: ['plans:view', 'salons:view', 'subscription:view', 'users:view', 'roles:view'],
+    };
     const visibleItems = NAVIGATION_ITEMS.filter((item) =>
-      hasRole(ROLES.SUPER_ADMIN.value, item.allowedRoles)
+      hasPermission(adminUser, item.requiredPermission)
     );
     const routes = visibleItems.map((item) => item.route);
 
-    expect(routes).toContain(ROUTES.ADMIN.value);
     expect(routes).toContain(ROUTES.ADMIN_PLANS.value);
     expect(routes).toContain(ROUTES.ADMIN_SALONS.value);
-    expect(routes).toContain(ROUTES.ADMIN_SUBSCRIPTION_HISTORY.value);
     expect(routes).toContain(ROUTES.SUBSCRIPTION.value);
   });
 

@@ -630,7 +630,7 @@ const Appointments = () => {
                                 sx={{ height: 20, fontSize: '0.7rem' }}
                               />
                               <Chip
-                                label={`$${Number(app.service?.price || 0).toFixed(2)}`}
+                                label={`₹${Number(app.service?.price || 0).toFixed(2)}`}
                                 size="small"
                                 color="primary"
                                 variant="outlined"
@@ -798,7 +798,7 @@ const Appointments = () => {
                 >
                   {services.map((s) => (
                     <MenuItem key={s.id} value={s.id}>
-                      {s.name} ({s.durationInMinutes} mins — ${Number(s.price).toFixed(2)})
+                      {s.name} ({s.durationInMinutes} mins — ₹{Number(s.price).toFixed(2)})
                     </MenuItem>
                   ))}
                 </Select>
@@ -967,7 +967,7 @@ const Appointments = () => {
                     {viewingAppointment.service?.name}
                   </Typography>
                   <Typography variant="body2" color="primary.main" fontWeight={600}>
-                    {viewingAppointment.service?.durationInMinutes} mins • ${Number(viewingAppointment.service?.price || 0).toFixed(2)}
+                    {viewingAppointment.service?.durationInMinutes} mins • ₹{Number(viewingAppointment.service?.price || 0).toFixed(2)}
                   </Typography>
                 </Box>
 

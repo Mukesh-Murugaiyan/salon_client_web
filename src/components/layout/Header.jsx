@@ -97,15 +97,6 @@ const Header = ({ onMobileMenuToggle }) => {
           >
             Salon Management Console
           </Typography>
-
-          {user?.role && (
-            <Chip
-              label={formattedRole}
-              size="small"
-              color={getRoleChipColor(user.role)}
-              sx={{ fontWeight: 600, fontSize: '0.7rem', height: 22 }}
-            />
-          )}
         </Box>
 
         {/* Right: User Identity & Logout Button */}

@@ -346,7 +346,7 @@ const ServicesList = () => {
               Avg. Price
             </Typography>
             <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.15rem' }, lineHeight: 1.2 }}>
-              ${stats.avgPrice}
+              ₹{stats.avgPrice}
             </Typography>
           </Box>
         </Card>
@@ -485,7 +485,7 @@ const ServicesList = () => {
 
                     <TableCell>
                       <Typography variant="body2" fontWeight={700} color="primary.main">
-                        ${Number(svc.price).toFixed(2)}
+                        ₹{Number(svc.price).toFixed(2)}
                       </Typography>
                     </TableCell>
 
@@ -596,7 +596,7 @@ const ServicesList = () => {
                 />
 
                 <TextField
-                  label="Price ($)"
+                  label="Price (₹)"
                   type="number"
                   required
                   fullWidth
@@ -604,7 +604,7 @@ const ServicesList = () => {
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   inputProps={{ min: 0, step: 0.5 }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
                   }}
                 />
               </Box>
@@ -683,7 +683,7 @@ const ServicesList = () => {
                       Price
                     </Typography>
                     <Typography variant="body1" fontWeight={700} color="primary.main">
-                      ${Number(viewingService.price).toFixed(2)}
+                      ₹{Number(viewingService.price).toFixed(2)}
                     </Typography>
                   </Box>
                 </Box>

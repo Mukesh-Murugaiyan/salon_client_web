@@ -13,7 +13,6 @@ import { Box, Typography } from '@mui/material';
  * @param {React.ReactNode} props.children - Page content
  */
 const PageContainer = ({ title, subtitle, action, actions, children }) => {
-  // Support both `action` (singular) and `actions` (plural) prop names
   const headerActions = actions ?? action;
   return (
     <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto' }}>

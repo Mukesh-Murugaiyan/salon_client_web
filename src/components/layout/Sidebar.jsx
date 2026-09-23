@@ -148,33 +148,6 @@ const Sidebar = ({ mobileOpen, onClose }) => {
         })}
       </List>
 
-      {/* Dynamic Tenant Context Footer Badge */}
-      <Box sx={{ p: 1.5, m: 1.5, borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.35 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.04em', fontSize: '0.65rem' }}>
-            TENANT CONTEXT
-          </Typography>
-          {user?.role?.code && (
-            <Chip
-              size="small"
-              label={user.role.name || user.role.code}
-              sx={{
-                height: '18px',
-                fontSize: '0.625rem',
-                fontWeight: 600,
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                color: '#6366f1',
-              }}
-            />
-          )}
-        </Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '0.8125rem' }} noWrap>
-          {user?.salon?.name || 'Default Salon'}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.7rem' }}>
-          Code: {user?.salon?.code || 'SYSTEM'}
-        </Typography>
-      </Box>
     </Box>
   );
 

@@ -334,7 +334,7 @@ const Plans = () => {
 
                     <TableCell>
                       <Typography variant="body2" fontWeight={700} color="primary.main">
-                        ${Number(p.price).toFixed(2)}
+                        ₹{Number(p.price).toFixed(2)}
                       </Typography>
                     </TableCell>
 
@@ -446,7 +446,7 @@ const Plans = () => {
 
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                 <TextField
-                  label="Price ($)"
+                  label="Price (₹)"
                   type="number"
                   required
                   fullWidth
@@ -454,7 +454,7 @@ const Plans = () => {
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   inputProps={{ min: 0, step: 0.01 }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
                   }}
                 />
 
@@ -555,7 +555,7 @@ const Plans = () => {
                       Price
                     </Typography>
                     <Typography variant="body1" fontWeight={700} color="primary.main">
-                      ${Number(viewingPlan.price).toFixed(2)}
+                      ₹{Number(viewingPlan.price).toFixed(2)}
                     </Typography>
                   </Box>
 

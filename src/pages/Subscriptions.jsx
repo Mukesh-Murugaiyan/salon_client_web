@@ -362,7 +362,7 @@ const Subscriptions = () => {
               {subscription?.plan && (
                 <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
                   <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ fontSize: { xs: '1.2rem', sm: '1.35rem' } }}>
-                    ${Number(subscription.plan.price).toFixed(2)}
+                    ₹{Number(subscription.plan.price).toFixed(2)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     per {subscription.plan.durationInDays} days billing cycle
@@ -525,7 +525,7 @@ const Subscriptions = () => {
 
                         <TableCell>
                           <Typography variant="body2" fontWeight={700} color="primary.main">
-                            ${Number(h.price).toFixed(2)}
+                            ₹{Number(h.price).toFixed(2)}
                           </Typography>
                         </TableCell>
 
@@ -592,7 +592,7 @@ const Subscriptions = () => {
                               {p.name}
                             </Typography>
                             <Typography variant="subtitle1" fontWeight={800} color="primary.main">
-                              ${Number(p.price).toFixed(2)}
+                              ₹{Number(p.price).toFixed(2)}
                             </Typography>
                           </Box>
                           <Typography variant="body2" color="text.secondary">
@@ -632,7 +632,7 @@ const Subscriptions = () => {
               <Typography variant="body2" color="text.secondary" sx={{ pt: 1 }}>
                 Renewing will extend your current <strong>{subscription?.plan?.name}</strong> plan for another{' '}
                 <strong>{subscription?.plan?.durationInDays} days</strong> at{' '}
-                <strong>${Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
+                <strong>₹{Number(subscription?.plan?.price || 0).toFixed(2)}</strong>.
               </Typography>
             </DialogContent>
             <DialogActions sx={{ px: 2, py: 1.25 }}>
